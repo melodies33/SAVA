@@ -40,9 +40,6 @@ item_metrics <- item_metrics %>%
   mutate(arrival_time = arrival_day) %>%  
   select(-arrival_day, -first_review_time)
 
-cat("唯一到达时间数量:", length(unique(item_metrics$arrival_time)), "\n")
-cat("商品总数量:", nrow(item_metrics), "\n")
-
 thetas <- numeric(nrow(item_metrics))
 thetas[item_metrics$avg_rating >= 3] <- 1  
 thetas[item_metrics$avg_rating < 3] <- -1  
