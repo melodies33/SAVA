@@ -247,7 +247,7 @@ outputlength = n.time*prob.start
 {
   FSR.mu = matrix(0, outputlength, length(mu.v))
   TSR.mu = matrix(0, outputlength, length(mu.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(mu.v)){
@@ -537,7 +537,7 @@ outputlength = n.time*prob.start
   write_csv(datare, 'addis_gaussian_mu.csv')
 }
 
-##### Comparison in general distribution ####
+##### Comparison in truncated Guassian distribution ####
 n.time = 3000 # number of total times
 prob.start = 1/3# probability of another hypothesis starting to be observed
 q = 0.05 # significant level
@@ -555,7 +555,7 @@ outputlength = n.time*prob.start
   mu = 1
   FSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
   TSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
   for(i in 1:length(ratioplus)){
@@ -597,7 +597,7 @@ outputlength = n.time*prob.start
 {
   FSR.mu = matrix(0, outputlength, length(mu.v))
   TSR.mu = matrix(0, outputlength, length(mu.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(mu.v)){
@@ -896,7 +896,7 @@ outputlength = n.time*prob.start
 
 
 
-##### SAVA under Gamma model ####
+##### Comparison under Gamma model ####
 # true mu+ = mu*mumulti and mu- = mu/mumulti for Gamma mean
 n.time = 3000 # number of total times
 prob.start = 1/3# probability of another hypothesis starting to be observed
@@ -1286,7 +1286,7 @@ outputlength = n.time*prob.start
 
 
 
-##### SAVA under beta model ####
+##### Comparison under beta model ####
 # true mu+ = mu0 + mudelta and mu- = mu0 - mudelta for sample mean
 n.time = 3000 # number of total times
 prob.start = 1/3# probability of another hypothesis starting to be observed
@@ -1299,12 +1299,13 @@ beta0 = 2
 w0 = q
 n.rep = 1000# repeated number
 outputlength = n.time*prob.start
+#### SAVA #####
 # change pi+
 {
   mudelta = 0.14
   FSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
   TSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
   for(i in 1:length(ratioplus)){
@@ -1350,7 +1351,7 @@ outputlength = n.time*prob.start
   ratio.plus = 0.5
   FSR.mu = matrix(0, outputlength, length(mudelta.v))
   TSR.mu = matrix(0, outputlength, length(mudelta.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(mudelta.v)){
@@ -1673,7 +1674,7 @@ outputlength = n.time*prob.start
   write_csv(datare, 'addis_beta_mu.csv')
   
 }
-##### SAVA under beta model with coin betting e-process ####
+##### Comparison under beta model with coin betting e-process ####
 # true mu+ = mu0 + mudelta and mu- = mu0 - mudelta for sample mean
 n.time = 3000 # number of total times
 prob.start = 1/3# probability of another hypothesis starting to be observed
@@ -1686,12 +1687,13 @@ beta0 = 2
 w0 = q
 n.rep = 1000# repeated number
 outputlength = n.time*prob.start
+##### SAVA #####
 # change pi+
 {
   mudelta = 0.05
   FSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
   TSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
   for(i in 1:length(ratioplus)){
@@ -1737,7 +1739,7 @@ outputlength = n.time*prob.start
   ratio.plus = 0.5
   FSR.mu = matrix(0, outputlength, length(mudelta.v))
   TSR.mu = matrix(0, outputlength, length(mudelta.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(mudelta.v)){
@@ -2061,7 +2063,7 @@ outputlength = n.time*prob.start
 }
 
 
-##### SAVA with subgaussian e-processes ####
+##### Comparison with subgaussian e-processes ####
 #### Gaussian model ####
 # true mu+ = mu0 + mudelta and mu- = mu0 - mudelta for sample mean
 n.time = 3000 # number of total times
@@ -2075,12 +2077,13 @@ w0 = q
 subsigma = 1
 n.rep = 1000# repeated number
 outputlength = n.time*prob.start
+##### SAVA #####
 # change pi+
 {
   mudelta = 0.5
   FSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
   TSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
   for(i in 1:length(ratioplus)){
@@ -2126,7 +2129,7 @@ outputlength = n.time*prob.start
   ratio.plus = 0.5
   FSR.mu = matrix(0, outputlength, length(mudelta.v))
   TSR.mu = matrix(0, outputlength, length(mudelta.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(mudelta.v)){
@@ -2467,7 +2470,7 @@ outputlength = n.time*prob.start
   mudelta = 0.5
   FSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
   TSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
   for(i in 1:length(ratioplus)){
@@ -2513,7 +2516,7 @@ outputlength = n.time*prob.start
   ratio.plus = 0.5
   FSR.mu = matrix(0, outputlength, length(mudelta.v))
   TSR.mu = matrix(0, outputlength, length(mudelta.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(mudelta.v)){
@@ -2835,7 +2838,7 @@ outputlength = n.time*prob.start
   write_csv(datare, 'addis_sub_unif_mu.csv')
   
 }
-#### Drifted Bernoulli model ####
+#### Comparison under drifted Bernoulli model ####
 # true mu+ = mu0 + mudelta and mu- = mu0 - mudelta for sample mean
 n.time = 3000 # number of total times
 prob.start = 1/3# probability of another hypothesis starting to be observed
@@ -2849,12 +2852,13 @@ berp = 0.3
 subsigma = 1
 n.rep = 1000# repeated number
 outputlength = n.time*prob.start
+#### SAVA ####
 # change pi+
 {
   mudelta = 0.5
   FSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
   TSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
   for(i in 1:length(ratioplus)){
@@ -2900,7 +2904,7 @@ outputlength = n.time*prob.start
   ratio.plus = 0.5
   FSR.mu = matrix(0, outputlength, length(mudelta.v))
   TSR.mu = matrix(0, outputlength, length(mudelta.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(mudelta.v)){
@@ -3224,7 +3228,7 @@ outputlength = n.time*prob.start
 }
 
 
-##### SAVA under uniform model, change a #####
+##### SAVA under misspecified uniform model: change a #####
 # true mu+ = mu0 + mudelta and mu- = mu0 - mudelta for sample mean
 n.time = 3000 # number of total times
 prob.start = 1/3# probability of another hypothesis starting to be observed
@@ -3239,12 +3243,13 @@ subsigma = sigma0
 n.rep = 1000# repeated number
 outputlength = n.time*prob.start
 ratio.plus = 0.5
-# mu_delta = 0.5
+
+# the case when mu_delta = 0.5
 {
   mudelta = 0.5
   FSR.mu = matrix(0, outputlength, length(a.v))
   TSR.mu = matrix(0, outputlength, length(a.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(a.v)){
@@ -3284,12 +3289,12 @@ ratio.plus = 0.5
     geom_line(aes(x = time, y = TSR, color = a))
   write_csv(datare, 'sava_subgau_unif_a.csv')
 }
-# mu_delta = 1
+# the case when mu_delta = 1
 {
   mudelta = 1
   FSR.mu = matrix(0, outputlength, length(a.v))
   TSR.mu = matrix(0, outputlength, length(a.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(a.v)){
@@ -3330,7 +3335,7 @@ ratio.plus = 0.5
   write_csv(datare, 'sava_subgau_unif_a_mu1.csv')
 }
 
-#### SAVA under truncated Gaussian, change K ######
+#### SAVA under truncated Gaussian: change K ######
 n.time = 3000 # number of total times
 prob.start = 1/3# probability of another hypothesis starting to be observed
 q = 0.05 # significant level
@@ -3346,7 +3351,7 @@ outputlength = n.time*prob.start
   mu = 1
   FSR.mu = matrix(0, outputlength, length(bound.v))
   TSR.mu = matrix(0, outputlength, length(bound.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(bound.v)){
@@ -3393,7 +3398,7 @@ outputlength = n.time*prob.start
   mu = 1.5
   FSR.mu = matrix(0, outputlength, length(bound.v))
   TSR.mu = matrix(0, outputlength, length(bound.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(bound.v)){
@@ -3437,7 +3442,7 @@ outputlength = n.time*prob.start
 
 
 
-##### SAVA with dependent data streams ####
+##### comparison with dependent data streams ####
 
 #### Gaussian model ####
 # true mu+ = mu0 + mudelta and mu- = mu0 - mudelta for sample mean
@@ -3452,12 +3457,13 @@ subsigma = 1
 rho.v = c(0.2,0.3,0.4,0.5)
 n.rep = 1000# repeated number
 outputlength = n.time*prob.start
+#### SAVA ####
 # change pi+
 {
   rho = 0.5
   FSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
   TSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
   for(i in 1:length(ratioplus)){
@@ -3503,7 +3509,7 @@ outputlength = n.time*prob.start
   ratio.plus = 0.5
   FSR.mu = matrix(0, outputlength, length(rho.v))
   TSR.mu = matrix(0, outputlength, length(rho.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(rho.v)){
@@ -3839,13 +3845,13 @@ w0 = q
 gammak = 2
 n.rep = 1000# repeated number
 outputlength = n.time*prob.start
-
+#### SAVA ####
 # change pi+
 {
   rho = 0.5
   FSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
   TSR.ratioplus = matrix(NA, outputlength, length(ratioplus))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
   for(i in 1:length(ratioplus)){
@@ -3891,7 +3897,7 @@ outputlength = n.time*prob.start
   ratio.plus = 0.5
   FSR.mu = matrix(0, outputlength, length(rho.v))
   TSR.mu = matrix(0, outputlength, length(rho.v))
-  cl <- makeCluster(10)
+  cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
   for(i in 1:length(rho.v)){

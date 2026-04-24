@@ -892,6 +892,15 @@ write.csv(threposi.dat, 'threposi-online.csv')
 write.csv(threnega.dat, 
           'threnega-online.csv')
 
-thresava = test_obs
+thresava = threposi.sava
 thresava.dat = tibble(threshold = as.vector(thresava), index = rep(seq(100,500,100), length(time_obs)), decision_time = rep(time_obs, each = 5))
 write.csv(thresava.dat, 'threshold-sava.csv')
+
+thresholdcompare = tibble(Test_level = c(rep(as.vector(thresava),2), threposi.dat$threshold, threnega.dat$threshold), 
+                          Index = c(rep(thresava.dat$index, 2), threposi.dat$Index, threnega.dat$Index),
+                          Decision_time = c(rep(thresava.dat$decision_time, 2), threposi.dat$Index, threnega.dat$Index),
+                          Method = c(rep('SAVA', 2*length(thresava.dat$index)), threposi.dat$Method, threnega.dat$Method),
+                          Arm = c(rep('B', length(thresava.dat$index)), rep('A', length(thresava.dat$index)), rep('B', length(threposi.dat$Index)), rep('A', length(threnega.dat$Index)))
+                          )
+write.csv(thresholdcompare, 
+          'threshold-compare.csv')
