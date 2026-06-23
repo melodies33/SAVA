@@ -12,7 +12,7 @@ axissizetext = 20*fd
 legendsize = 20*fd
 titlesize = 26*fd
 totaltitlesize = 30*fd
-#### counterexample 1 ####
+#### counterexample 1 (Figure E.1 in Section E.1 Counterexample 1) ####
 counterex = read_csv('sava_counterexample_1.csv')
 pointindex = seq(10,length(counterex$time),10)
 ggplot()+
@@ -66,7 +66,7 @@ dev.off()
 
 ggsave('counter example 1.pdf', plot = p, width = 21, height = 7)
 
-#### counterexample 2 ####
+#### counterexample 2 (Figure E.2 in Section E.2 Counterexample 2)####
 counterex = read_csv('sava_counterexample_2.csv')
 
 pointindex = seq(10,length(counterex$time),10)
@@ -122,8 +122,8 @@ dev.off()
 
 ggsave('counter example 2.pdf', plot = p, width = 21, height = 7)
 
-#### results for different k #####
-re1 = read_csv('sava oracle k curve p0.02.csv')
+#### results for different k (Figure B.4 in Section B.3.3 Choosing the bandwidth of neighborhood) #####
+re1 = read_csv('sava oracle k curve p0.05.csv')
 re2 = read_csv('sava oracle k curve p0.33.csv')
 re3 = read_csv('sava oracle k curve p0.66.csv')
 
@@ -175,9 +175,9 @@ CairoPNG(filename = 'oracle k.png', width = 1600,height = 800)
 p
 dev.off()
 ggsave('oracle k.pdf', plot = p, width = 20, height = 10)
-#### Gaussian case ####
+#### Gaussian case (Section B.3, Figure B.2 and Figure B.3) ####
 
-#### pi+ ####
+#### pi+ (Figure B.2)####
 {
   sava = read_csv('sava_gaussian_pi.csv')
 onlinelord = read_csv('lordpp_gaussian_pi.csv')
@@ -245,7 +245,7 @@ dev.off()
   
 ggsave('gaussian_pi.pdf', plot = p, width = 26, height = 13)
 }
-#### mu #####
+#### mu (Figure B.3) #####
 {
   sava = read_csv('sava_gaussian_mu.csv')
   onlinelord = read_csv('lordpp_gaussian_mu.csv')
@@ -314,9 +314,9 @@ ggsave('gaussian_pi.pdf', plot = p, width = 26, height = 13)
   ggsave('gaussian_mu.pdf', plot = pp, width = 26, height = 13)
 }
 
-#### truncated Gaussian case ####
+#### truncated Gaussian case (Section B.4, Figure B.5 and Figure B.6) ####
 
-#### pi+ ####
+#### pi+ (Figure B.5) ####
 {
   sava = read_csv('sava_general_pi.csv')
   onlinelord = read_csv('lordpp_general_pi.csv')
@@ -384,7 +384,7 @@ ggsave('gaussian_pi.pdf', plot = p, width = 26, height = 13)
   
   ggsave('general_pi.pdf', plot = p, width = 26, height = 13)
 }
-#### mu #####
+#### mu (Figure B.6) #####
 {
   sava = read_csv('sava_general_mu.csv')
   onlinelord = read_csv('lordpp_general_mu.csv')
@@ -450,9 +450,9 @@ ggsave('gaussian_pi.pdf', plot = p, width = 26, height = 13)
   
 }
 
-#### Gamma #####
+#### Gamma model (Section B.5, Figure B.7 and Figure B.8) #####
 
-# change pi+
+# change pi+ (Figure B.7)
 {
   sava = read_csv('sava_gamma_pi.csv')
   lord = read_csv('lordpp_gamma_pi.csv')
@@ -535,7 +535,7 @@ annotate_figure(
 
 ggsave('total_gamma_pi.pdf', plot = p, width = 26, height = 13)
 }
-# change pdelta
+# change pdelta (Figure B.8)
 {
   sava = read_csv('sava_gamma_multiply.csv')
   lord = read_csv('lordpp_gamma_mumulti.csv')
@@ -609,8 +609,8 @@ ggsave('total_gamma_pi.pdf', plot = p, width = 26, height = 13)
   ggsave('total_gamma_delta.pdf', plot = p, width = 26, height = 13)
 }
 
-#### Beta #####
-# change pi
+#### Beta model (Section B.6, Beta model experiment 1, Figure B.9 and FIgure B.10) #####
+# change pi (Figure B.9)
 {
   sava = read_csv('sava_beta_pi.csv')
   lord = read_csv('lordpp_beta_pi.csv')
@@ -694,7 +694,7 @@ ggsave('total_gamma_pi.pdf', plot = p, width = 26, height = 13)
   
   ggsave('total_beta_pi.pdf', plot = p, width = 26, height = 13)
 }
-# change pdelta
+# change pdelta (Figure B.10)
 {
   sava = read_csv('sava_beta_delta.csv')
   lord = read_csv('lordpp_beta_mu.csv')
@@ -768,8 +768,8 @@ ggsave('total_gamma_pi.pdf', plot = p, width = 26, height = 13)
   ggsave('total_beta_delta.pdf', plot = p, width = 26, height = 13)
 }
 
-#### Beta distribution with coin betting method #####
-# change pi+
+#### Beta distribution with coin betting method (Section B.6, Beta model experiment 2, Figure B.11 and Figure B.12) #####
+# change pi+ (Figure B.11)
 {
     sava = read_csv('sava_beta_pi_coin.csv')
     lord = read_csv('lordpp_beta_coin_pi.csv')
@@ -853,7 +853,7 @@ ggsave('total_gamma_pi.pdf', plot = p, width = 26, height = 13)
   
   ggsave('total_beta_coin_pi.pdf', plot = p, width = 26, height = 13)
 }
-# change pdelta
+# change pdelta (Figure B.12)
 {
     sava = read_csv('sava_beta_delta_coin.csv')
   lord = read_csv('lordpp_beta_coin_mu.csv')
@@ -931,7 +931,7 @@ ggsave('total_gamma_pi.pdf', plot = p, width = 26, height = 13)
   ggsave('total_beta_coin_delta.pdf', plot = p, width = 26, height = 13)
 }
 
-#### sub-Gaussian: Gaussian model #####
+#### sub-Gaussian case (Section B.7): Gaussian model (Figure B.13 and Figure B.14) #####
 # change pi+
 {
   sava = read_csv('sava_subgau_gauss_pi.csv')
@@ -1090,7 +1090,7 @@ ggsave('total_gamma_pi.pdf', plot = p, width = 26, height = 13)
   ggsave('total_subGauss_Gauss_delta.pdf', plot = p, width = 26, height = 13)
 }
 
-#### sub-Gaussian: Uniform #####
+#### sub-Gaussian (Section B.7): Uniform model (Figure B.15 and Figure B.16)  #####
 # change pi+
 {
   sava = read_csv('sava_subgau_unif_pi.csv')
@@ -1251,7 +1251,7 @@ ggsave('total_gamma_pi.pdf', plot = p, width = 26, height = 13)
   ggsave('total_subGauss_unif_delta.pdf', plot = p, width = 26, height = 13)
 }
 
-#### sub-Gaussian: Bernoulli #####
+#### sub-Gaussian (Section B.7): Bernoulli model (Figure B.17 and Figure B.18)  #####
 # change pi+
 {
   sava = read_csv('sava_subgau_ber_pi.csv')
@@ -1408,7 +1408,327 @@ ggsave('total_gamma_pi.pdf', plot = p, width = 26, height = 13)
   ggsave('total_subGauss_ber_delta.pdf', plot = p, width = 26, height = 13)
 }
 
-#### Misspecified models: Uniform case: change a #####
+
+
+#### dependent case (Section B.8): Gaussian model (Figure B.19 and Figure B.20) #####
+# change pi+
+{
+  sava = read_csv('sava_depend_subgau_gauss_pi.csv')
+  lord = read_csv('lordpp_depend_sub_gauss_pi.csv')
+  saff = read_csv('saffron_depend_sub_gauss_pi.csv')
+  addi = read_csv('addis_depend_sub_gauss_pi.csv')
+  
+  total_rows <- nrow(sava)
+  block_size <- 1000
+  keep_per_block <- 800
+  full_blocks <- total_rows %/% block_size
+  indices <- unlist(lapply(1:full_blocks, function(b) {
+    start <- (b - 1) * block_size + 1
+    end   <- (b - 1) * block_size + keep_per_block
+    start:end
+  }))
+  selectindex = indices
+  l = length(selectindex)
+  sava = sava[selectindex,]
+  lord = lord[selectindex,]
+  saff = saff[selectindex,]
+  addi = addi[selectindex,]
+  
+  fsr = c(sava$FSR,  lord$FSR, saff$FSR, addi$FSR)
+  pi = c(sava$pi, lord$pi, saff$pi, addi$pi)
+  tsr = c(sava$TSR, lord$TSR, saff$TSR, addi$TSR)
+  method = c('SAVA', 'LORD++', 'SAFFRON', 'ADDIS')
+  
+  time = c(sava$time, lord$time, saff$time, addi$time)
+  methodvec = rep(method, each = l)
+  totalpi = tibble( time = time, FSR = fsr, TSR = tsr, pi = as.factor(pi), method = methodvec)
+  
+  
+  pilabel = c('pi: 0.2', 'pi: 0.4', 'pi: 0.6', 'pi: 0.8')
+  names(pilabel) = c('0.2','0.4','0.6','0.8')
+  
+  pointindex = seq(80, length(totalpi$time), 80)
+  
+  ggplot()+
+    geom_point(aes(x = time, y = FSR, shape = method, color = method), size = pointsize, data = totalpi[pointindex,])+
+    geom_line(aes(x = time, y = FSR, color = method),
+              linewidth = lnwidth, data = totalpi)+
+    theme(axis.title = element_text(size = axissizett),
+          axis.text = element_text(size = axissizetext))+
+    theme(legend.text = element_text(size = legendsize),
+          legend.title = element_text(size = legendsize))+
+    facet_wrap(~pi, labeller = labeller(pi = pilabel), ncol = 2)+
+    theme(strip.text.x = element_text(size = legendsize))+
+    theme(panel.spacing = unit(2, "lines"))+
+    labs(x = 'Indices of decision times')+
+    scale_y_continuous(breaks = seq(0,0.005,0.001), limits = c(0,0.005))+
+    ggtitle('Intermediate FSR level Comparison')+
+    theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
+    scale_color_brewer(palette = 'Set1') -> p1
+  
+  ggplot()+
+    geom_point(aes(x = time, y = TSR, shape = method, color = method), size = pointsize, data = totalpi[pointindex,])+
+    geom_line(aes(x = time, y = TSR, color = method),
+              linewidth = lnwidth, data = totalpi)+
+    theme(axis.title = element_text(size = axissizett),
+          axis.text = element_text(size = axissizetext))+
+    theme(legend.text = element_text(size = legendsize),
+          legend.title = element_text(size = legendsize))+
+    facet_wrap(~pi, labeller = labeller(pi = pilabel), ncol = 2)+
+    theme(strip.text.x = element_text(size = legendsize))+
+    theme(panel.spacing = unit(2, "lines"))+
+    ylim(0,1)+
+    labs(x = 'Indices of decision times')+
+    ggtitle('Intermediate TSR level Comparison')+
+    theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
+    scale_color_brewer(palette = 'Set1') -> p2
+  
+  ggarrange(p1,p2, ncol = 2, common.legend = T, legend = 'bottom') -> p
+  
+  annotate_figure(
+    p,
+    top = text_grob(
+      TeX("Methods Comparison (constant $\\rho = 0.5$)"),
+      size = totaltitlesize
+    )
+  ) -> p
+  
+  ggsave('total_depend_subGauss_Gauss_pi.pdf', plot = p, width = 26, height = 13)
+}
+# change pdelta
+{
+  sava = read_csv('sava_depend_subgau_gauss_rho.csv')
+  lord = read_csv('lordpp_depend_sub_gauss_mu.csv')
+  saff = read_csv('saffron_depend_sub_gauss_mu.csv')
+  addi = read_csv('addis_depend_sub_gauss_mu.csv')
+  
+  sava = sava[selectindex,]
+  lord = lord[selectindex,]
+  saff = saff[selectindex,]
+  addi = addi[selectindex,]
+  
+  fsr = c(sava$FSR,  lord$FSR, saff$FSR, addi$FSR)
+  delta = c(sava$rho, lord$rho, saff$rho, addi$rho)
+  tsr = c(sava$TSR, lord$TSR, saff$TSR, addi$TSR)
+  method = c('SAVA', 'LORD++', 'SAFFRON', 'ADDIS')
+  
+  time = c(sava$time, lord$time, saff$time, addi$time)
+  methodvec = rep(method, each = l)
+  totaldelta = tibble( time = time, FSR = fsr, TSR = tsr, delta = as.factor(delta), method = methodvec)
+  
+  deltalabel = c('rho: 0.2', 'rho: 0.3', 'rho: 0.4', 'rho: 0.5')
+  names(deltalabel) = c('0.2','0.3','0.4','0.5')
+  pointindex = seq(80, length(totaldelta$time), 80)
+  
+  ggplot()+
+    geom_point(aes(x = time, y = FSR, shape = method, color = method), size = pointsize, data = totaldelta[pointindex,])+
+    geom_line(aes(x = time, y = FSR, color = method),
+              linewidth = lnwidth, data = totaldelta)+
+    theme(axis.title = element_text(size = axissizett),
+          axis.text = element_text(size = axissizetext))+
+    theme(legend.text = element_text(size = legendsize),
+          legend.title = element_text(size = legendsize))+
+    facet_wrap(~delta, labeller = labeller(delta = deltalabel), ncol = 2)+
+    theme(strip.text.x = element_text(size = legendsize))+
+    theme(panel.spacing = unit(2, "lines"))+
+    labs(x = 'Indices of decision times')+
+    scale_y_continuous(breaks = seq(0,0.005,0.001), limits = c(0,0.005))+
+    ggtitle('Intermediate FSR level Comparison')+
+    theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
+    scale_color_brewer(palette = 'Set1') -> p1
+  
+  ggplot()+
+    geom_point(aes(x = time, y = TSR, shape = method, color = method), size = pointsize, data = totaldelta[pointindex,])+
+    geom_line(aes(x = time, y = TSR, color = method),
+              linewidth = lnwidth, data = totaldelta)+
+    theme(axis.title = element_text(size = axissizett),
+          axis.text = element_text(size = axissizetext))+
+    theme(legend.text = element_text(size = legendsize),
+          legend.title = element_text(size = legendsize))+
+    facet_wrap(~delta, labeller = labeller(delta = deltalabel), ncol = 2)+
+    theme(strip.text.x = element_text(size = legendsize))+
+    theme(panel.spacing = unit(2, "lines"))+
+    ylim(0,1)+
+    labs(x = 'Indices of decision times')+
+    ggtitle('Intermediate TSR level Comparison')+
+    theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
+    scale_color_brewer(palette = 'Set1') -> p2
+  
+  ggarrange(p1,p2, ncol = 2, common.legend = T, legend = 'bottom') -> p
+  
+  annotate_figure(
+    p,
+    top = text_grob(
+      TeX("Methods Comparison (constant $\\pi^+ = 0.5$)"),
+      size = totaltitlesize
+    )
+  ) -> p
+  
+  
+  ggsave('total_depend_subGauss_Gauss_delta.pdf', plot = p, width = 26, height = 13)
+}
+
+
+#### dependent case (Section B.8): Gamma model (Figure B.21 and Figure B.22) #####
+# change pi+
+{
+  sava = read_csv('sava_depend_gamma_pi.csv')
+  lord = read_csv('lordpp_depend_gamma_pi.csv')
+  saff = read_csv('saffron_depend_gamma_pi.csv')
+  addi = read_csv('addis_depend_gamma_pi.csv')
+  
+  total_rows <- nrow(sava)
+  block_size <- 1000
+  keep_per_block <- 800
+  full_blocks <- total_rows %/% block_size
+  indices <- unlist(lapply(1:full_blocks, function(b) {
+    start <- (b - 1) * block_size + 1
+    end   <- (b - 1) * block_size + keep_per_block
+    start:end
+  }))
+  selectindex = indices
+  l = length(selectindex)
+  sava = sava[selectindex,]
+  lord = lord[selectindex,]
+  saff = saff[selectindex,]
+  addi = addi[selectindex,]
+  
+  fsr = c(sava$FSR,  lord$FSR, saff$FSR, addi$FSR)
+  pi = c(sava$pi, lord$pi, saff$pi, addi$pi)
+  tsr = c(sava$TSR, lord$TSR, saff$TSR, addi$TSR)
+  method = c('SAVA', 'LORD++', 'SAFFRON', 'ADDIS')
+  
+  time = c(sava$time, lord$time, saff$time, addi$time)
+  methodvec = rep(method, each = l)
+  totalpi = tibble( time = time, FSR = fsr, TSR = tsr, pi = as.factor(pi), method = methodvec)
+  
+  pilabel = c('pi: 0.2', 'pi: 0.4', 'pi: 0.6', 'pi: 0.8')
+  names(pilabel) = c('0.2','0.4','0.6','0.8')
+  pointindex = seq(80, length(totalpi$time), 80)
+  
+  ggplot()+
+    geom_point(aes(x = time, y = FSR, shape = method, color = method), size = pointsize, data = totalpi[pointindex,])+
+    geom_line(aes(x = time, y = FSR, color = method),
+              linewidth = lnwidth, data = totalpi)+
+    theme(axis.title = element_text(size = axissizett),
+          axis.text = element_text(size = axissizetext))+
+    theme(legend.text = element_text(size = legendsize),
+          legend.title = element_text(size = legendsize))+
+    facet_wrap(~pi, labeller = labeller(pi = pilabel), ncol = 2)+
+    theme(strip.text.x = element_text(size = legendsize))+
+    theme(panel.spacing = unit(2, "lines"))+
+    labs(x = 'Indices of decision times')+
+    scale_y_continuous(breaks = seq(0,0.005,0.001), limits = c(0,0.005))+
+    ggtitle('Intermediate FSR level Comparison')+
+    theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
+    scale_color_brewer(palette = 'Set1') -> p1
+  
+  ggplot()+
+    geom_point(aes(x = time, y = TSR, shape = method, color = method), size = pointsize, data = totalpi[pointindex,])+
+    geom_line(aes(x = time, y = TSR, color = method),
+              linewidth = lnwidth, data = totalpi)+
+    theme(axis.title = element_text(size = axissizett),
+          axis.text = element_text(size = axissizetext))+
+    theme(legend.text = element_text(size = legendsize),
+          legend.title = element_text(size = legendsize))+
+    facet_wrap(~pi, labeller = labeller(pi = pilabel), ncol = 2)+
+    theme(strip.text.x = element_text(size = legendsize))+
+    theme(panel.spacing = unit(2, "lines"))+
+    ylim(0,1)+
+    labs(x = 'Indices of decision times')+
+    ggtitle('Intermediate TSR level Comparison')+
+    theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
+    scale_color_brewer(palette = 'Set1') -> p2
+  
+  ggarrange(p1,p2, ncol = 2, common.legend = T, legend = 'bottom') -> p
+  
+  annotate_figure(
+    p,
+    top = text_grob(
+      TeX("Methods Comparison (constant $\\rho = 0.5$)"),
+      size = totaltitlesize
+    )
+  ) -> p
+  
+  ggsave('total_depend_gamma_pi.pdf', plot = p, width = 26, height = 13)
+}
+# change pdelta
+{
+  sava = read_csv('sava_depend_gamma_multiply.csv')
+  lord = read_csv('lordpp_depend_gamma_mu.csv')
+  saff = read_csv('saffron_depend_gamma_mu.csv')
+  addi = read_csv('addis_depend_gamma_mu.csv')
+  
+  sava = sava[selectindex,]
+  lord = lord[selectindex,]
+  saff = saff[selectindex,]
+  addi = addi[selectindex,]
+  
+  fsr = c(sava$FSR,  lord$FSR, saff$FSR, addi$FSR)
+  delta = c(sava$multiply, lord$rho, saff$rho, addi$rho)
+  tsr = c(sava$TSR, lord$TSR, saff$TSR, addi$TSR)
+  method = c('SAVA', 'LORD++', 'SAFFRON', 'ADDIS')
+  
+  time = c(sava$time, lord$time, saff$time, addi$time)
+  methodvec = rep(method, each = l)
+  totaldelta = tibble( time = time, FSR = fsr, TSR = tsr, delta = as.factor(delta), method = methodvec)
+  
+  deltalabel = c('rho: 0.2', 'rho: 0.4', 'rho: 0.6', 'rho: 0.8')
+  names(deltalabel) = c('0.2','0.4','0.6','0.8')
+  
+  pointindex = seq(80, length(totaldelta$time), 80)
+  
+  ggplot()+
+    geom_point(aes(x = time, y = FSR, shape = method, color = method), size = pointsize, data = totaldelta[pointindex,])+
+    geom_line(aes(x = time, y = FSR, color = method),
+              linewidth = lnwidth, data = totaldelta)+
+    theme(axis.title = element_text(size = axissizett),
+          axis.text = element_text(size = axissizetext))+
+    theme(legend.text = element_text(size = legendsize),
+          legend.title = element_text(size = legendsize))+
+    facet_wrap(~delta, labeller = labeller(delta = deltalabel), ncol = 2)+
+    theme(strip.text.x = element_text(size = legendsize))+
+    theme(panel.spacing = unit(2, "lines"))+
+    labs(x = 'Indices of decision times')+
+    scale_y_continuous(breaks = seq(0,0.005,0.001), limits = c(0,0.005))+
+    ggtitle('Intermediate FSR level Comparison')+
+    theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
+    scale_color_brewer(palette = 'Set1') -> p1
+  
+  ggplot()+
+    geom_point(aes(x = time, y = TSR, shape = method, color = method), size = pointsize, data = totaldelta[pointindex,])+
+    geom_line(aes(x = time, y = TSR, color = method),
+              linewidth = lnwidth, data = totaldelta)+
+    theme(axis.title = element_text(size = axissizett),
+          axis.text = element_text(size = axissizetext))+
+    theme(legend.text = element_text(size = legendsize),
+          legend.title = element_text(size = legendsize))+
+    facet_wrap(~delta, labeller = labeller(delta = deltalabel), ncol = 2)+
+    theme(strip.text.x = element_text(size = legendsize))+
+    theme(panel.spacing = unit(2, "lines"))+
+    ylim(0,1)+
+    labs(x = 'Indices of decision times')+
+    ggtitle('Intermediate TSR level Comparison')+
+    theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
+    scale_color_brewer(palette = 'Set1') -> p2
+  
+  ggarrange(p1,p2, ncol = 2, common.legend = T, legend = 'bottom') -> p
+  
+  annotate_figure(
+    p,
+    top = text_grob(
+      TeX("Methods Comparison (constant $\\pi^+ = 0.5$)"),
+      size = totaltitlesize
+    )
+  ) -> p
+  
+  
+  ggsave('total_depend_gamma_multiply.pdf', plot = p, width = 26, height = 13)
+}
+
+
+
+#### Misspecified models (Section B.9): Uniform case: change a (Figure B.23) #####
 # change a
 {
   sava1 = read_csv('sava_subgau_unif_a.csv')
@@ -1497,7 +1817,7 @@ ggsave('total_gamma_pi.pdf', plot = p, width = 26, height = 13)
   ggsave('sava_unif_a.pdf', plot = p, width = 35, height = 12)
 }
 
-####  Misspecified models: Truncated Gaussian case: change K #####
+####  Misspecified models (Section B.9): Truncated Gaussian case: change K (Figure B.24) #####
 # change K
 {
   sava1 = read_csv('sava_truncgauss_K_mu1.5.csv')
@@ -1583,322 +1903,5 @@ ggsave('total_gamma_pi.pdf', plot = p, width = 26, height = 13)
   ) -> p
   
   ggsave('sava_truncgauss_k.pdf', plot = p, width = 35, height = 12)
-}
-
-
-#### dependent case: Gaussian model #####
-# change pi+
-{
-  sava = read_csv('sava_depend_subgau_gauss_pi.csv')
-   lord = read_csv('lordpp_depend_sub_gauss_pi.csv')
-    saff = read_csv('saffron_depend_sub_gauss_pi.csv')
-    addi = read_csv('addis_depend_sub_gauss_pi.csv')
-    
-    total_rows <- nrow(sava)
-    block_size <- 1000
-    keep_per_block <- 800
-    full_blocks <- total_rows %/% block_size
-    indices <- unlist(lapply(1:full_blocks, function(b) {
-      start <- (b - 1) * block_size + 1
-      end   <- (b - 1) * block_size + keep_per_block
-      start:end
-    }))
-    selectindex = indices
-    l = length(selectindex)
-    sava = sava[selectindex,]
-    lord = lord[selectindex,]
-    saff = saff[selectindex,]
-    addi = addi[selectindex,]
-    
-    fsr = c(sava$FSR,  lord$FSR, saff$FSR, addi$FSR)
-    pi = c(sava$pi, lord$pi, saff$pi, addi$pi)
-    tsr = c(sava$TSR, lord$TSR, saff$TSR, addi$TSR)
-    method = c('SAVA', 'LORD++', 'SAFFRON', 'ADDIS')
-    
-    time = c(sava$time, lord$time, saff$time, addi$time)
-    methodvec = rep(method, each = l)
-    totalpi = tibble( time = time, FSR = fsr, TSR = tsr, pi = as.factor(pi), method = methodvec)
-    
-    
-    pilabel = c('pi: 0.2', 'pi: 0.4', 'pi: 0.6', 'pi: 0.8')
-    names(pilabel) = c('0.2','0.4','0.6','0.8')
-    
-    pointindex = seq(80, length(totalpi$time), 80)
-    
-    ggplot()+
-      geom_point(aes(x = time, y = FSR, shape = method, color = method), size = pointsize, data = totalpi[pointindex,])+
-      geom_line(aes(x = time, y = FSR, color = method),
-                linewidth = lnwidth, data = totalpi)+
-      theme(axis.title = element_text(size = axissizett),
-            axis.text = element_text(size = axissizetext))+
-      theme(legend.text = element_text(size = legendsize),
-            legend.title = element_text(size = legendsize))+
-      facet_wrap(~pi, labeller = labeller(pi = pilabel), ncol = 2)+
-      theme(strip.text.x = element_text(size = legendsize))+
-      theme(panel.spacing = unit(2, "lines"))+
-      labs(x = 'Indices of decision times')+
-      scale_y_continuous(breaks = seq(0,0.005,0.001), limits = c(0,0.005))+
-      ggtitle('Intermediate FSR level Comparison')+
-      theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
-      scale_color_brewer(palette = 'Set1') -> p1
-    
-    ggplot()+
-      geom_point(aes(x = time, y = TSR, shape = method, color = method), size = pointsize, data = totalpi[pointindex,])+
-      geom_line(aes(x = time, y = TSR, color = method),
-                linewidth = lnwidth, data = totalpi)+
-      theme(axis.title = element_text(size = axissizett),
-            axis.text = element_text(size = axissizetext))+
-      theme(legend.text = element_text(size = legendsize),
-            legend.title = element_text(size = legendsize))+
-      facet_wrap(~pi, labeller = labeller(pi = pilabel), ncol = 2)+
-      theme(strip.text.x = element_text(size = legendsize))+
-      theme(panel.spacing = unit(2, "lines"))+
-      ylim(0,1)+
-      labs(x = 'Indices of decision times')+
-      ggtitle('Intermediate TSR level Comparison')+
-      theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
-      scale_color_brewer(palette = 'Set1') -> p2
-    
-    ggarrange(p1,p2, ncol = 2, common.legend = T, legend = 'bottom') -> p
-    
-  annotate_figure(
-    p,
-    top = text_grob(
-      TeX("Methods Comparison (constant $\\rho = 0.5$)"),
-      size = totaltitlesize
-    )
-  ) -> p
-  
-  ggsave('total_depend_subGauss_Gauss_pi.pdf', plot = p, width = 26, height = 13)
-}
-# change pdelta
-{
-  sava = read_csv('sava_depend_subgau_gauss_rho.csv')
- lord = read_csv('lordpp_depend_sub_gauss_mu.csv')
-    saff = read_csv('saffron_depend_sub_gauss_mu.csv')
-    addi = read_csv('addis_depend_sub_gauss_mu.csv')
-    
-    sava = sava[selectindex,]
-    lord = lord[selectindex,]
-    saff = saff[selectindex,]
-    addi = addi[selectindex,]
-    
-    fsr = c(sava$FSR,  lord$FSR, saff$FSR, addi$FSR)
-    delta = c(sava$rho, lord$rho, saff$rho, addi$rho)
-    tsr = c(sava$TSR, lord$TSR, saff$TSR, addi$TSR)
-    method = c('SAVA', 'LORD++', 'SAFFRON', 'ADDIS')
-    
-    time = c(sava$time, lord$time, saff$time, addi$time)
-    methodvec = rep(method, each = l)
-    totaldelta = tibble( time = time, FSR = fsr, TSR = tsr, delta = as.factor(delta), method = methodvec)
-    
-    deltalabel = c('rho: 0.2', 'rho: 0.3', 'rho: 0.4', 'rho: 0.5')
-    names(deltalabel) = c('0.2','0.3','0.4','0.5')
-    pointindex = seq(80, length(totaldelta$time), 80)
-    
-    ggplot()+
-      geom_point(aes(x = time, y = FSR, shape = method, color = method), size = pointsize, data = totaldelta[pointindex,])+
-      geom_line(aes(x = time, y = FSR, color = method),
-                linewidth = lnwidth, data = totaldelta)+
-      theme(axis.title = element_text(size = axissizett),
-            axis.text = element_text(size = axissizetext))+
-      theme(legend.text = element_text(size = legendsize),
-            legend.title = element_text(size = legendsize))+
-      facet_wrap(~delta, labeller = labeller(delta = deltalabel), ncol = 2)+
-      theme(strip.text.x = element_text(size = legendsize))+
-      theme(panel.spacing = unit(2, "lines"))+
-      labs(x = 'Indices of decision times')+
-      scale_y_continuous(breaks = seq(0,0.005,0.001), limits = c(0,0.005))+
-      ggtitle('Intermediate FSR level Comparison')+
-      theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
-      scale_color_brewer(palette = 'Set1') -> p1
-    
-    ggplot()+
-      geom_point(aes(x = time, y = TSR, shape = method, color = method), size = pointsize, data = totaldelta[pointindex,])+
-      geom_line(aes(x = time, y = TSR, color = method),
-                linewidth = lnwidth, data = totaldelta)+
-      theme(axis.title = element_text(size = axissizett),
-            axis.text = element_text(size = axissizetext))+
-      theme(legend.text = element_text(size = legendsize),
-            legend.title = element_text(size = legendsize))+
-      facet_wrap(~delta, labeller = labeller(delta = deltalabel), ncol = 2)+
-      theme(strip.text.x = element_text(size = legendsize))+
-      theme(panel.spacing = unit(2, "lines"))+
-      ylim(0,1)+
-      labs(x = 'Indices of decision times')+
-      ggtitle('Intermediate TSR level Comparison')+
-      theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
-      scale_color_brewer(palette = 'Set1') -> p2
-    
-    ggarrange(p1,p2, ncol = 2, common.legend = T, legend = 'bottom') -> p
-    
-    annotate_figure(
-      p,
-      top = text_grob(
-        TeX("Methods Comparison (constant $\\pi^+ = 0.5$)"),
-        size = totaltitlesize
-      )
-    ) -> p
-    
-    
-  ggsave('total_depend_subGauss_Gauss_delta.pdf', plot = p, width = 26, height = 13)
-}
-
-
-#### dependent case: Gamma model #####
-# change pi+
-{
-  sava = read_csv('sava_depend_gamma_pi.csv')
-  lord = read_csv('lordpp_depend_gamma_pi.csv')
-  saff = read_csv('saffron_depend_gamma_pi.csv')
-  addi = read_csv('addis_depend_gamma_pi.csv')
-    
-    total_rows <- nrow(sava)
-    block_size <- 1000
-    keep_per_block <- 800
-    full_blocks <- total_rows %/% block_size
-    indices <- unlist(lapply(1:full_blocks, function(b) {
-      start <- (b - 1) * block_size + 1
-      end   <- (b - 1) * block_size + keep_per_block
-      start:end
-    }))
-    selectindex = indices
-    l = length(selectindex)
-    sava = sava[selectindex,]
-    lord = lord[selectindex,]
-    saff = saff[selectindex,]
-    addi = addi[selectindex,]
-    
-    fsr = c(sava$FSR,  lord$FSR, saff$FSR, addi$FSR)
-    pi = c(sava$pi, lord$pi, saff$pi, addi$pi)
-    tsr = c(sava$TSR, lord$TSR, saff$TSR, addi$TSR)
-    method = c('SAVA', 'LORD++', 'SAFFRON', 'ADDIS')
-    
-    time = c(sava$time, lord$time, saff$time, addi$time)
-    methodvec = rep(method, each = l)
-    totalpi = tibble( time = time, FSR = fsr, TSR = tsr, pi = as.factor(pi), method = methodvec)
-    
-    pilabel = c('pi: 0.2', 'pi: 0.4', 'pi: 0.6', 'pi: 0.8')
-    names(pilabel) = c('0.2','0.4','0.6','0.8')
-    pointindex = seq(80, length(totalpi$time), 80)
-    
-    ggplot()+
-      geom_point(aes(x = time, y = FSR, shape = method, color = method), size = pointsize, data = totalpi[pointindex,])+
-      geom_line(aes(x = time, y = FSR, color = method),
-                linewidth = lnwidth, data = totalpi)+
-      theme(axis.title = element_text(size = axissizett),
-            axis.text = element_text(size = axissizetext))+
-      theme(legend.text = element_text(size = legendsize),
-            legend.title = element_text(size = legendsize))+
-      facet_wrap(~pi, labeller = labeller(pi = pilabel), ncol = 2)+
-      theme(strip.text.x = element_text(size = legendsize))+
-      theme(panel.spacing = unit(2, "lines"))+
-      labs(x = 'Indices of decision times')+
-      scale_y_continuous(breaks = seq(0,0.005,0.001), limits = c(0,0.005))+
-      ggtitle('Intermediate FSR level Comparison')+
-      theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
-      scale_color_brewer(palette = 'Set1') -> p1
-    
-    ggplot()+
-      geom_point(aes(x = time, y = TSR, shape = method, color = method), size = pointsize, data = totalpi[pointindex,])+
-      geom_line(aes(x = time, y = TSR, color = method),
-                linewidth = lnwidth, data = totalpi)+
-      theme(axis.title = element_text(size = axissizett),
-            axis.text = element_text(size = axissizetext))+
-      theme(legend.text = element_text(size = legendsize),
-            legend.title = element_text(size = legendsize))+
-      facet_wrap(~pi, labeller = labeller(pi = pilabel), ncol = 2)+
-      theme(strip.text.x = element_text(size = legendsize))+
-      theme(panel.spacing = unit(2, "lines"))+
-      ylim(0,1)+
-      labs(x = 'Indices of decision times')+
-      ggtitle('Intermediate TSR level Comparison')+
-      theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
-      scale_color_brewer(palette = 'Set1') -> p2
-    
-    ggarrange(p1,p2, ncol = 2, common.legend = T, legend = 'bottom') -> p
-    
-    annotate_figure(
-      p,
-      top = text_grob(
-        TeX("Methods Comparison (constant $\\rho = 0.5$)"),
-        size = totaltitlesize
-      )
-    ) -> p
-   
-  ggsave('total_depend_gamma_pi.pdf', plot = p, width = 26, height = 13)
-}
-# change pdelta
-{
-  sava = read_csv('sava_depend_gamma_multiply.csv')
-  lord = read_csv('lordpp_depend_gamma_mu.csv')
-    saff = read_csv('saffron_depend_gamma_mu.csv')
-    addi = read_csv('addis_depend_gamma_mu.csv')
-    
-    sava = sava[selectindex,]
-    lord = lord[selectindex,]
-    saff = saff[selectindex,]
-    addi = addi[selectindex,]
-    
-    fsr = c(sava$FSR,  lord$FSR, saff$FSR, addi$FSR)
-    delta = c(sava$multiply, lord$rho, saff$rho, addi$rho)
-    tsr = c(sava$TSR, lord$TSR, saff$TSR, addi$TSR)
-    method = c('SAVA', 'LORD++', 'SAFFRON', 'ADDIS')
-    
-    time = c(sava$time, lord$time, saff$time, addi$time)
-    methodvec = rep(method, each = l)
-    totaldelta = tibble( time = time, FSR = fsr, TSR = tsr, delta = as.factor(delta), method = methodvec)
-    
-    deltalabel = c('rho: 0.2', 'rho: 0.4', 'rho: 0.6', 'rho: 0.8')
-    names(deltalabel) = c('0.2','0.4','0.6','0.8')
-    
-    pointindex = seq(80, length(totaldelta$time), 80)
-    
-    ggplot()+
-      geom_point(aes(x = time, y = FSR, shape = method, color = method), size = pointsize, data = totaldelta[pointindex,])+
-      geom_line(aes(x = time, y = FSR, color = method),
-                linewidth = lnwidth, data = totaldelta)+
-      theme(axis.title = element_text(size = axissizett),
-            axis.text = element_text(size = axissizetext))+
-      theme(legend.text = element_text(size = legendsize),
-            legend.title = element_text(size = legendsize))+
-      facet_wrap(~delta, labeller = labeller(delta = deltalabel), ncol = 2)+
-      theme(strip.text.x = element_text(size = legendsize))+
-      theme(panel.spacing = unit(2, "lines"))+
-      labs(x = 'Indices of decision times')+
-      scale_y_continuous(breaks = seq(0,0.005,0.001), limits = c(0,0.005))+
-      ggtitle('Intermediate FSR level Comparison')+
-      theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
-      scale_color_brewer(palette = 'Set1') -> p1
-    
-    ggplot()+
-      geom_point(aes(x = time, y = TSR, shape = method, color = method), size = pointsize, data = totaldelta[pointindex,])+
-      geom_line(aes(x = time, y = TSR, color = method),
-                linewidth = lnwidth, data = totaldelta)+
-      theme(axis.title = element_text(size = axissizett),
-            axis.text = element_text(size = axissizetext))+
-      theme(legend.text = element_text(size = legendsize),
-            legend.title = element_text(size = legendsize))+
-      facet_wrap(~delta, labeller = labeller(delta = deltalabel), ncol = 2)+
-      theme(strip.text.x = element_text(size = legendsize))+
-      theme(panel.spacing = unit(2, "lines"))+
-      ylim(0,1)+
-      labs(x = 'Indices of decision times')+
-      ggtitle('Intermediate TSR level Comparison')+
-      theme(plot.title = element_text(size = titlesize, hjust = 0.5))+
-      scale_color_brewer(palette = 'Set1') -> p2
-    
-    ggarrange(p1,p2, ncol = 2, common.legend = T, legend = 'bottom') -> p
-    
-    annotate_figure(
-      p,
-      top = text_grob(
-        TeX("Methods Comparison (constant $\\pi^+ = 0.5$)"),
-        size = totaltitlesize
-      )
-    ) -> p
-    
-    
-  ggsave('total_depend_gamma_multiply.pdf', plot = p, width = 26, height = 13)
 }
 

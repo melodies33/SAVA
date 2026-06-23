@@ -10,65 +10,41 @@ source('functions_sava.R')
 library(lubridate)
 library(data.table)
 
-###### fashion items #####
-amazon_data <- fread("real-amazon25/AMAZON_FASHION.csv",
-                     col.names = c("item_id", "user_id", "rating", "timestamp"))
+###### Functions for algorithms #####
 
-processed_data <- amazon_data %>%
-  filter(rating >= 1 & rating <= 5) %>%
-  arrange(item_id, timestamp)
+# Function: amazon_sava
+#
+# Implement the SAVA algorithm in Section 4.
+#
+# Inputs:
+#   item_metrics     : the pre-processed dataframe of items.
+#   rating_sequences : the sequence of ratings.
+#   thetas           : true states of tasks.
+#   bound            : size of support. 
+#   q                : target FSR level.
+#   k                : tuning parameter k.
+#   w0               : initial alpha wealth.
+#   itemnumbner      : number of items.
+#   decision_times   : sequence of decision times.
+#
+# Returns:
+#   FSP     : false selection proportion sequence at each decision time.
+#   realsig : cumulated numbers of tasks at each decision time.
+#   posi    : number of true selection for items whose ratings are greater than 3.
+#   nega    : number of true selection for items whose ratings are less than 3.
+# 
+# Used in:
+#   SAVA algorithm in Section 4
+#
+# See Section 4 for details.
 
-item_metrics <- processed_data %>%
-  group_by(item_id) %>%
-  summarise(
-    first_review_time = min(timestamp),
-    total_reviews = n(),
-    avg_rating = mean(rating)
-  ) %>%
-  arrange(first_review_time) %>%
-  filter(total_reviews > 50)  
-
-min_time <- min(item_metrics$first_review_time)
-item_metrics <- item_metrics %>%
-  mutate(arrival_day = as.integer((first_review_time - min_time) / 86400)) %>%
-  arrange(arrival_day, item_id)
-
-item_metrics <- item_metrics %>%
-  group_by(arrival_day) %>%
-  slice(1) %>% 
-  ungroup() %>%
-  mutate(arrival_time = arrival_day) %>%  
-  select(-arrival_day, -first_review_time)
-
-thetas <- numeric(nrow(item_metrics))
-thetas[item_metrics$avg_rating >= 3] <- 1  
-thetas[item_metrics$avg_rating < 3] <- -1  
-arrival_map <- item_metrics %>% select(item_id, arrival_time)
-
-rating_sequences <- processed_data %>%
-  inner_join(arrival_map, by = "item_id") %>%
-  arrange(item_id, timestamp) %>%
-  group_by(item_id) %>%
-  mutate(review_seq = row_number(),
-         review_time = as.integer((timestamp - min_time) / 86400)) %>%
-  ungroup()
-
-rating_sequences$rating = rating_sequences$rating - 3
-
-item_metrics <- item_metrics %>% arrange(arrival_time)
-capnumber <- nrow(item_metrics)
-
-time_max = max(rating_sequences$review_time)
-decision_times <- c(item_metrics$arrival_time[-1],time_max)
-num_decision = length(decision_times)
-###### SAVA #####
-amazon_sava <- function(item_metrics, rating_sequences, thetas, bound = 4, q = 0.1, k = 25, w0 = q, gamma = 0, capnumber = capnumber, decision_times = decision_times) {
+amazon_sava <- function(item_metrics, rating_sequences, thetas, bound = 4, q = 0.1, k = 25, w0 = q, itemnumbner = itemnumbner, decision_times = decision_times) {
   
   
-  deltaesti <- rep(0, capnumber)  
-  stoptime <- rep(Inf, capnumber) 
-  thresholdvec <- rep(0, capnumber)
-  thresholdvec[1:min(k, capnumber)] <- w0/k
+  deltaesti <- rep(0, itemnumbner)  
+  stoptime <- rep(Inf, itemnumbner) 
+  thresholdvec <- rep(0, itemnumbner)
+  thresholdvec[1:min(k, itemnumbner)] <- w0/k
   
   selectlarger1 <- 0  
   num_decisions <- length(decision_times)
@@ -94,8 +70,8 @@ amazon_sava <- function(item_metrics, rating_sequences, thetas, bound = 4, q = 0
         if (length(current_ratings) == 0) next 
         threshold <- thresholdvec[task_idx]
         
-        cs.below <- falphaplus(threshold, current_ratings, bound, length(current_ratings), gamma)
-        cs.above <- falphaminus(threshold, current_ratings, bound, length(current_ratings), gamma)
+        cs.below <- falphaplus(threshold, current_ratings, bound, length(current_ratings), q)
+        cs.above <- falphaminus(threshold, current_ratings, bound, length(current_ratings), q)
         
         deltaplus <- cs.below >= 0  
         deltaminus <- cs.above < 0 
@@ -110,7 +86,7 @@ amazon_sava <- function(item_metrics, rating_sequences, thetas, bound = 4, q = 0
           } else {
             selectnega <- c(selectnega, task_idx)
           }
-          endindex <- min(task_idx + k, capnumber)
+          endindex <- min(task_idx + k, itemnumbner)
           if (endindex > task_idx) {
             if (selectlarger1 == 1) {
               thresholdvec[(task_idx + 1):endindex] <- thresholdvec[(task_idx + 1):endindex] + (q - w0) / k
@@ -144,25 +120,45 @@ amazon_sava <- function(item_metrics, rating_sequences, thetas, bound = 4, q = 0
   return(list(
     FSP = fsp,
     realsig = realtotal,
-    decision_times = decision_times,
     posi = positotal,
     nega = negatotal
   ))
 }
 
-###### Lordpp #######
+# Function: amazon_lordpp
+#
+# Implement the LORD++ algorithm in Section 4.
+#
+# Inputs:
+#   item_metrics     : the pre-processed dataframe of items.
+#   rating_sequences : the sequence of ratings.
+#   thetas           : true states of tasks.
+#   q                : target FSR level.
+#   itemnumbner      : number of items.
+#   decision_times   : sequence of decision times.
+#
+# Returns:
+#   FSP     : false selection proportion sequence at each decision time.
+#   realsig : cumulated numbers of tasks at each decision time.
+#   posi    : number of true selection for items whose ratings are greater than 3.
+#   nega    : number of true selection for items whose ratings are less than 3.
+# 
+# Used in:
+#   LORD++ algorithm in Section 4
+#
+# See Section 4 for details.
 
-amazon_lordpp <- function(item_metrics, rating_sequences, thetas, q = 0.1, gamma = 0, capnumber = capnumber, decision_times = decision_times) {
+amazon_lordpp <- function(item_metrics, rating_sequences, thetas, q = 0.1, itemnumbner = itemnumbner, decision_times = decision_times) {
   selectposi <- integer(0) 
   selectnega <- integer(0)  
-  deltaesti <- rep(0, capnumber)  
-  falsetotal <- numeric(capnumber)
-  decidetotal <- numeric(capnumber)
-  positotal <- numeric(capnumber)
-  negatotal <- numeric(capnumber)
-  realtotal <- numeric(capnumber)
-  for (i in 1:capnumber) {
-    print(i/capnumber)
+  deltaesti <- rep(0, itemnumbner)  
+  falsetotal <- numeric(itemnumbner)
+  decidetotal <- numeric(itemnumbner)
+  positotal <- numeric(itemnumbner)
+  negatotal <- numeric(itemnumbner)
+  realtotal <- numeric(itemnumbner)
+  for (i in 1:itemnumbner) {
+    print(i/itemnumbner)
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -214,21 +210,43 @@ amazon_lordpp <- function(item_metrics, rating_sequences, thetas, q = 0.1, gamma
   ))
 }
 
+# Function: amazon_saffron
+#
+# Implement the SAFFRON algorithm in Section 4.
+#
+# Inputs:
+#   item_metrics     : the pre-processed dataframe of items.
+#   rating_sequences : the sequence of ratings.
+#   thetas           : true states of tasks.
+#   q                : target FSR level.
+#   Clamb            : parameter lambda in SAFFRON.
+#   itemnumbner      : number of items.
+#   decision_times   : sequence of decision times.
+#
+# Returns:
+#   FSP     : false selection proportion sequence at each decision time.
+#   realsig : cumulated numbers of tasks at each decision time.
+#   posi    : number of true selection for items whose ratings are greater than 3.
+#   nega    : number of true selection for items whose ratings are less than 3.
+# 
+# Used in:
+#   SAFFRON algorithm in Section 4
+#
+# See Section 4 for details.
 
-####### SAFFRON ########
-amazon_saffron <- function(item_metrics, rating_sequences, thetas, q = 0.1, Clamb = 0.5, gamma = 0,  capnumber = capnumber, decision_times = decision_times) {
+amazon_saffron <- function(item_metrics, rating_sequences, thetas, q = 0.1, Clamb = 0.5, itemnumbner = itemnumbner, decision_times = decision_times) {
   selectposi <- integer(0)  
   selectnega <- integer(0)  
-  cplus <- rep(0, capnumber)  
-  cminus <- rep(0, capnumber) 
-  deltaesti <- rep(0, capnumber) 
-  falsetotal <- numeric(capnumber)
-  decidetotal <- numeric(capnumber)
-  realtotal <- numeric(capnumber)
-  positotal <- numeric(capnumber)
-  negatotal <- numeric(capnumber)
-  for (i in 1:capnumber) {
-    print(i/capnumber)
+  cplus <- rep(0, itemnumbner)  
+  cminus <- rep(0, itemnumbner) 
+  deltaesti <- rep(0, itemnumbner) 
+  falsetotal <- numeric(itemnumbner)
+  decidetotal <- numeric(itemnumbner)
+  realtotal <- numeric(itemnumbner)
+  positotal <- numeric(itemnumbner)
+  negatotal <- numeric(itemnumbner)
+  for (i in 1:itemnumbner) {
+    print(i/itemnumbner)
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -286,25 +304,48 @@ amazon_saffron <- function(item_metrics, rating_sequences, thetas, q = 0.1, Clam
   ))
 }
 
+# Function: amazon_addis
+#
+# Implement the ADDIS algorithm in Section 4.
+#
+# Inputs:
+#   item_metrics     : the pre-processed dataframe of items.
+#   rating_sequences : the sequence of ratings.
+#   thetas           : true states of tasks.
+#   q                : target FSR level.           
+#   lamb             : parameter lambda in ADDIS.
+#   tau              : parameter tau in ADDIS. 
+#   itemnumbner      : number of items.
+#   decision_times   : sequence of decision times.
+#
+# Returns:
+#   FSP     : false selection proportion sequence at each decision time.
+#   realsig : cumulated numbers of tasks at each decision time.
+#   posi    : number of true selection for items whose ratings are greater than 3.
+#   nega    : number of true selection for items whose ratings are less than 3.
+# 
+# Used in:
+#   ADDIS algorithm in Section 4
+#
+# See Section 4 for details.
 
-##### ADDIS ######
-amazon_addis <- function(item_metrics, rating_sequences, thetas, q = 0.1, Clamb = 0.5, gamma = 0, lamb = 0.25, tau = 0.5, capnumber = capnumber, decision_times = decision_times) {
+amazon_addis <- function(item_metrics, rating_sequences, thetas, q = 0.1, lamb = 0.25, tau = 0.5, itemnumbner = itemnumbner, decision_times = decision_times) {
   selectposi <- integer(0)  
   selectnega <- integer(0) 
   kstarposi <- integer(0)   
   kstarnega <- integer(0)  
-  splus <- rep(0, capnumber) 
-  sminus <- rep(0, capnumber)
-  cplus <- rep(0, capnumber)  
-  cminus <- rep(0, capnumber)
-  deltaesti <- rep(0, capnumber) 
-  falsetotal <- numeric(capnumber)
-  decidetotal <- numeric(capnumber)
-  realtotal <- numeric(capnumber)
-  positotal = numeric(capnumber)
-  negatotal = numeric(capnumber)
-  for (i in 1:capnumber) {
-    print(i/capnumber)
+  splus <- rep(0, itemnumbner) 
+  sminus <- rep(0, itemnumbner)
+  cplus <- rep(0, itemnumbner)  
+  cminus <- rep(0, itemnumbner)
+  deltaesti <- rep(0, itemnumbner) 
+  falsetotal <- numeric(itemnumbner)
+  decidetotal <- numeric(itemnumbner)
+  realtotal <- numeric(itemnumbner)
+  positotal = numeric(itemnumbner)
+  negatotal = numeric(itemnumbner)
+  for (i in 1:itemnumbner) {
+    print(i/itemnumbner)
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -373,49 +414,106 @@ amazon_addis <- function(item_metrics, rating_sequences, thetas, q = 0.1, Clamb 
   ))
 }
 
-#### main fashion ####
-q = 0.2
-# Amazon fashion
+
+
+###### pre-process data from Amazon Fashion #####
+amazon_data <- fread("real-amazon25/AMAZON_FASHION.csv",
+                     col.names = c("item_id", "user_id", "rating", "timestamp"))
+
+processed_data <- amazon_data %>%
+  filter(rating >= 1 & rating <= 5) %>%
+  arrange(item_id, timestamp)
+
+item_metrics <- processed_data %>%
+  group_by(item_id) %>%
+  summarise(
+    first_review_time = min(timestamp),
+    total_reviews = n(),
+    avg_rating = mean(rating)
+  ) %>%
+  arrange(first_review_time) %>%
+  filter(total_reviews > 50)  
+
+min_time <- min(item_metrics$first_review_time)
+item_metrics <- item_metrics %>%
+  mutate(arrival_day = as.integer((first_review_time - min_time) / 86400)) %>%
+  arrange(arrival_day, item_id)
+
+item_metrics <- item_metrics %>%
+  group_by(arrival_day) %>%
+  slice(1) %>% 
+  ungroup() %>%
+  mutate(arrival_time = arrival_day) %>%  
+  select(-arrival_day, -first_review_time)
+
+thetas <- numeric(nrow(item_metrics))
+thetas[item_metrics$avg_rating >= 3] <- 1  
+thetas[item_metrics$avg_rating < 3] <- -1  
+arrival_map <- item_metrics %>% select(item_id, arrival_time)
+
+rating_sequences <- processed_data %>%
+  inner_join(arrival_map, by = "item_id") %>%
+  arrange(item_id, timestamp) %>%
+  group_by(item_id) %>%
+  mutate(review_seq = row_number(),
+         review_time = as.integer((timestamp - min_time) / 86400)) %>%
+  ungroup()
+
+rating_sequences$rating = rating_sequences$rating - 3
+
+item_metrics <- item_metrics %>% arrange(arrival_time)
+itemnumbner <- nrow(item_metrics)
+
+time_max = max(rating_sequences$review_time)
+decision_times <- c(item_metrics$arrival_time[-1],time_max)
+num_decision = length(decision_times)
+
+#### Compare methods under data from Amazon Fashion (for figure 5) ####
+q = 0.2  # target FSR level
 startpeek = floor(num_decision/10)
-time.peek = seq(startpeek, num_decision, startpeek)
+time.peek = seq(startpeek, num_decision, startpeek) # time points for recording FSP, TSP
 
 # SAVA
-re = amazon_sava(item_metrics, rating_sequences, thetas, q, k = 100, w0 = q, bound = 4, gamma = 0,capnumber = capnumber, decision_times = decision_times)
+re = amazon_sava(item_metrics, rating_sequences, thetas, q, k = 100, w0 = q, bound = 4, itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.sava = re$FSP[time.peek]
 posi.sava = re$posi[time.peek]
 nega.sava = re$nega[time.peek]
 
 # LORD++
-re = amazon_lordpp(item_metrics, rating_sequences, thetas, q, gamma = 0,capnumber = capnumber, decision_times = decision_times)
+re = amazon_lordpp(item_metrics, rating_sequences, thetas, q, itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.lordpp = re$FSP[time.peek]
 posi.lordpp = re$posi[time.peek]
 nega.lordpp = re$nega[time.peek]
-# SAFFRON
 
-re = amazon_saffron(item_metrics, rating_sequences, thetas, q, Clamb = 0.5, gamma = 0,  capnumber = capnumber, decision_times = decision_times)
+# SAFFRON
+re = amazon_saffron(item_metrics, rating_sequences, thetas, q, Clamb = 0.5,   itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.saffron = re$FSP[time.peek]
 posi.saffron = re$posi[time.peek]
 nega.saffron = re$nega[time.peek]
-# ADDIS
 
-re = amazon_addis(item_metrics, rating_sequences, thetas, q, Clamb = 0.5, gamma = 0, lamb = 0.25, tau = 0.5, capnumber = capnumber, decision_times = decision_times)
+# ADDIS
+re = amazon_addis(item_metrics, rating_sequences, thetas, q, lamb = 0.25, tau = 0.5, itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.addis = re$FSP[time.peek]
 posi.addis = re$posi[time.peek]
 nega.addis = re$nega[time.peek]
+
 
 select.sava = posi.sava + nega.sava
 select.lordpp = posi.lordpp + nega.lordpp
 select.saffron = posi.saffron + nega.saffron
 select.addis = posi.addis + nega.addis
 
-re.dat = tibble(FSP = c(FSR.sava, FSR.lordpp, FSR.saffron, FSR.addis), 
+# summary of performances 
+re.dat = tibble(
+  decision.time = rep(time.peek, 4),
+  FSP = c(FSR.sava, FSR.lordpp, FSR.saffron, FSR.addis), 
                 Positive = c(posi.sava, posi.lordpp, posi.saffron, posi.addis), 
                 Negative = c(nega.sava, nega.lordpp, nega.saffron, nega.addis), 
                 Totalselection = c(select.sava, select.lordpp, select.saffron, select.addis),
                 Method = rep(c('SAVA', 'LORD++', 'SAFFRON', 'ADDIS'), each = length(time.peek)))
 write.csv(re.dat, 'amazon-fashion-comprison.csv')
 
-#### All beauty data ####
+#### pre-process data from All beauty data ####
 amazon_data <- fread("real-amazon25/AMAZON_All_Beauty.csv",
                      col.names = c("item_id", "user_id", "rating", "timestamp"))
 
@@ -456,36 +554,35 @@ rating_sequences <- processed_data %>%
 
 rating_sequences$rating = rating_sequences$rating - 3
 item_metrics <- item_metrics %>% arrange(arrival_time)
-capnumber <- nrow(item_metrics)
+itemnumbner <- nrow(item_metrics)
 time_max = max(rating_sequences$review_time)
 decision_times <- c(item_metrics$arrival_time[-1],time_max)
 num_decision = length(decision_times)
 
-#### main all beauty ####
+#### Compare methods under All beauty data (for figure 5) ####
 q = 0.2
 startpeek = floor(num_decision/10)
-time.peek = seq(startpeek, num_decision, startpeek)
-
+time.peek = seq(startpeek, num_decision, startpeek) # time points for recording FSP, TSP
 # SAVA
-re = amazon_sava(item_metrics, rating_sequences, thetas, q, k = 100, w0 = q, bound = 4, gamma = 0,capnumber = capnumber, decision_times = decision_times)
+re = amazon_sava(item_metrics, rating_sequences, thetas, q, k = 100, w0 = q, bound = 4, itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.sava = re$FSP[time.peek]
 posi.sava = re$posi[time.peek]
 nega.sava = re$nega[time.peek]
 
 # LORD++
-re = amazon_lordpp(item_metrics, rating_sequences, thetas, q, gamma = 0,capnumber = capnumber, decision_times = decision_times)
+re = amazon_lordpp(item_metrics, rating_sequences, thetas, q, itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.lordpp = re$FSP[time.peek]
 posi.lordpp = re$posi[time.peek]
 nega.lordpp = re$nega[time.peek]
 # SAFFRON
 
-re = amazon_saffron(item_metrics, rating_sequences, thetas, q, Clamb = 0.5, gamma = 0,  capnumber = capnumber, decision_times = decision_times)
+re = amazon_saffron(item_metrics, rating_sequences, thetas, q, Clamb = 0.5,  itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.saffron = re$FSP[time.peek]
 posi.saffron = re$posi[time.peek]
 nega.saffron = re$nega[time.peek]
 # ADDIS
 
-re = amazon_addis(item_metrics, rating_sequences, thetas, q, Clamb = 0.5, gamma = 0, lamb = 0.25, tau = 0.5, capnumber = capnumber, decision_times = decision_times)
+re = amazon_addis(item_metrics, rating_sequences, thetas, q,  lamb = 0.25, tau = 0.5, itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.addis = re$FSP[time.peek]
 posi.addis = re$posi[time.peek]
 nega.addis = re$nega[time.peek]
@@ -495,7 +592,10 @@ select.lordpp = posi.lordpp + nega.lordpp
 select.saffron = posi.saffron + nega.saffron
 select.addis = posi.addis + nega.addis
 
-re.dat = tibble(FSP = c(FSR.sava, FSR.lordpp, FSR.saffron, FSR.addis), 
+# summary of performances 
+re.dat = tibble(
+  decision.time = rep(time.peek, 4),
+  FSP = c(FSR.sava, FSR.lordpp, FSR.saffron, FSR.addis), 
                 Positive = c(posi.sava, posi.lordpp, posi.saffron, posi.addis), 
                 Negative = c(nega.sava, nega.lordpp, nega.saffron, nega.addis), 
                 Totalselection = c(select.sava, select.lordpp, select.saffron, select.addis),
@@ -505,7 +605,7 @@ write.csv(re.dat, 'amazon-allbeauty-comprison.csv')
 
 
 
-#### Luxury beauty data ####
+#### pre-process data from Luxury beauty data ####
 amazon_data <- fread("real-amazon25/AMAZON_Luxury_Beauty.csv",
                      col.names = c("item_id", "user_id", "rating", "timestamp"))
 processed_data <- amazon_data %>%
@@ -547,37 +647,36 @@ rating_sequences <- processed_data %>%
 rating_sequences$rating = rating_sequences$rating - 3
 
 item_metrics <- item_metrics %>% arrange(arrival_time)
-capnumber <- nrow(item_metrics)
+itemnumbner <- nrow(item_metrics)
 
 time_max = max(rating_sequences$review_time)
 decision_times <- c(item_metrics$arrival_time[-1],time_max)
 num_decision = length(decision_times)
 
-#### main luxury beauty ####
+#### Compare methods under Luxury beauty data (for figure 5) ####
 q = 0.2
 startpeek = floor(num_decision/10)
-time.peek = seq(startpeek, num_decision, startpeek)
-
+time.peek = seq(startpeek, num_decision, startpeek) # time points for recording FSP, TSP
 # SAVA
-re = amazon_sava(item_metrics, rating_sequences, thetas, q, k = 100, w0 = q, bound = 4, gamma = 0,capnumber = capnumber, decision_times = decision_times)
+re = amazon_sava(item_metrics, rating_sequences, thetas, q, k = 100, w0 = q, bound = 4, itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.sava = re$FSP[time.peek]
 posi.sava = re$posi[time.peek]
 nega.sava = re$nega[time.peek]
 
 # LORD++
-re = amazon_lordpp(item_metrics, rating_sequences, thetas, q, gamma = 0,capnumber = capnumber, decision_times = decision_times)
+re = amazon_lordpp(item_metrics, rating_sequences, thetas, q, itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.lordpp = re$FSP[time.peek]
 posi.lordpp = re$posi[time.peek]
 nega.lordpp = re$nega[time.peek]
 # SAFFRON
 
-re = amazon_saffron(item_metrics, rating_sequences, thetas, q, Clamb = 0.5, gamma = 0,  capnumber = capnumber, decision_times = decision_times)
+re = amazon_saffron(item_metrics, rating_sequences, thetas, q, Clamb = 0.5,   itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.saffron = re$FSP[time.peek]
 posi.saffron = re$posi[time.peek]
 nega.saffron = re$nega[time.peek]
 # ADDIS
 
-re = amazon_addis(item_metrics, rating_sequences, thetas, q, Clamb = 0.5, gamma = 0, lamb = 0.25, tau = 0.5, capnumber = capnumber, decision_times = decision_times)
+re = amazon_addis(item_metrics, rating_sequences, thetas, q, lamb = 0.25, tau = 0.5, itemnumbner = itemnumbner, decision_times = decision_times)
 FSR.addis = re$FSP[time.peek]
 posi.addis = re$posi[time.peek]
 nega.addis = re$nega[time.peek]
@@ -587,7 +686,10 @@ select.lordpp = posi.lordpp + nega.lordpp
 select.saffron = posi.saffron + nega.saffron
 select.addis = posi.addis + nega.addis
 
-re.dat = tibble(FSP = c(FSR.sava, FSR.lordpp, FSR.saffron, FSR.addis), 
+# summary of performances 
+re.dat = tibble(
+  decision.time = rep(time.peek, 4),
+  FSP = c(FSR.sava, FSR.lordpp, FSR.saffron, FSR.addis), 
                 Positive = c(posi.sava, posi.lordpp, posi.saffron, posi.addis), 
                 Negative = c(nega.sava, nega.lordpp, nega.saffron, nega.addis), 
                 Totalselection = c(select.sava, select.lordpp, select.saffron, select.addis),
@@ -595,10 +697,34 @@ re.dat = tibble(FSP = c(FSR.sava, FSR.lordpp, FSR.saffron, FSR.addis),
 write.csv(re.dat, 'amazon-luxurybeauty-comprison.csv')
 
 
-######## test levels for different items #######
+######## Compare test levels for different methods (for figure 6) #######
 
-#### SAVA #####
-amazon_sava_testlevel <- function(item_metrics, rating_sequences, thetas, bound = 4, q = 0.2, k = 100, w0 = q, gamma = 0, obs_index, capnumber = capnumber, decision_times = decision_times) {
+
+# Function: amazon_sava_testlevel
+#
+# Implement the SAVA algorithm in Section 4 and record the test levels at specific decision times.
+#
+# Inputs:
+#   item_metrics     : the pre-processed dataframe of items.
+#   rating_sequences : the sequence of ratings.
+#   thetas           : true states of tasks.
+#   bound            : size of support. 
+#   q                : target FSR level.
+#   k                : tuning parameter k.
+#   w0               : initial alpha wealth.
+#   obs_index        : pre-specified tasks for recording test levels.
+#   itemnumbner      : number of items.
+#   decision_times   : sequence of decision times.
+#
+# Returns:
+#   test_level_obs     : test levels for the pre-specified tasks.
+# 
+# Used in:
+#   Check test levels of SAVA algorithm in Section 4.
+#
+# See Section 4 for details.
+
+amazon_sava_testlevel <- function(item_metrics, rating_sequences, thetas, bound = 4, q = 0.2, k = 100, w0 = q,  obs_index, itemnumbner = itemnumbner, decision_times = decision_times) {
   num_decisions <- length(decision_times)
   obs_index <- obs_index[obs_index <= num_decision]
   if (length(obs_index) == 0) {
@@ -607,10 +733,10 @@ amazon_sava_testlevel <- function(item_metrics, rating_sequences, thetas, bound 
   time_obs = seq(100, 900, 50)
   
   test_obs <- matrix(NA, length(obs_index), length(time_obs))
-  deltaesti <- rep(0, capnumber)  
-  stoptime <- rep(Inf, capnumber) 
-  thresholdvec <- rep(0, capnumber)
-  thresholdvec[1:min(k, capnumber)] <- w0/k
+  deltaesti <- rep(0, itemnumbner)  
+  stoptime <- rep(Inf, itemnumbner) 
+  thresholdvec <- rep(0, itemnumbner)
+  thresholdvec[1:min(k, itemnumbner)] <- w0/k
   selectlarger1 <- 0  
   for (ti in 1:num_decisions) {
     print(ti/num_decisions)
@@ -629,8 +755,8 @@ amazon_sava_testlevel <- function(item_metrics, rating_sequences, thetas, bound 
         
         if (length(current_ratings) == 0) next
         threshold <- thresholdvec[task_idx]
-        cs.below <- falphaplus(threshold, current_ratings, bound, length(current_ratings), gamma)
-        cs.above <- falphaminus(threshold, current_ratings, bound, length(current_ratings), gamma)
+        cs.below <- falphaplus(threshold, current_ratings, bound, length(current_ratings), q)
+        cs.above <- falphaminus(threshold, current_ratings, bound, length(current_ratings), q)
         deltaplus <- cs.below >= 0 
         deltaminus <- cs.above < 0
         deltatotal <- as.numeric(deltaplus) - as.numeric(deltaminus)
@@ -639,7 +765,7 @@ amazon_sava_testlevel <- function(item_metrics, rating_sequences, thetas, bound 
           deltaesti[task_idx] <- deltatotal
           stoptime[task_idx] <- current_time
           selectlarger1 <- selectlarger1 + 1
-          endindex <- min(task_idx + k, capnumber)
+          endindex <- min(task_idx + k, itemnumbner)
           if (endindex > task_idx) {
             if (selectlarger1 == 1) {
               thresholdvec[(task_idx + 1):endindex] <- thresholdvec[(task_idx + 1):endindex] + (q - w0) / k
@@ -657,9 +783,31 @@ amazon_sava_testlevel <- function(item_metrics, rating_sequences, thetas, bound 
   ))
 }
 
-#### Lordpp #####
-amazon_lordpp_testlevel <- function(item_metrics, rating_sequences, thetas, q = 0.1, gamma = 0, obs_index, capnumber = capnumber, decision_times = decision_times) {
-  obs_index <- obs_index[obs_index <= capnumber]
+
+# Function: amazon_lordpp_testlevel
+#
+# Implement the LORD++ algorithm in Section 4 and record the test levels at specific decision times.
+#
+# Inputs:
+#   item_metrics     : the pre-processed dataframe of items.
+#   rating_sequences : the sequence of ratings.
+#   thetas           : true states of tasks.
+#   q                : target FSR level.
+#   obs_index        : pre-specified tasks for recording test levels.
+#   itemnumbner      : number of items.
+#   decision_times   : sequence of decision times.
+#
+# Returns:
+#   test_level_obs_posi : test levels for arm A from the pre-specified tasks.
+#   test_level_obs_nega :test levels for arm B from the pre-specified tasks.
+# 
+# Used in:
+#   Check test levels of LORD++ algorithm in Section 4.
+#
+# See Section 4 for details.
+
+amazon_lordpp_testlevel <- function(item_metrics, rating_sequences, thetas, q = 0.1,  obs_index, itemnumbner = itemnumbner, decision_times = decision_times) {
+  obs_index <- obs_index[obs_index <= itemnumbner]
   if (length(obs_index) == 0) {
     stop("No valid observation indices provided")
   }
@@ -668,9 +816,9 @@ amazon_lordpp_testlevel <- function(item_metrics, rating_sequences, thetas, q = 
   obs_counter <- 1
   selectposi <- integer(0) 
   selectnega <- integer(0) 
-  deltaesti <- rep(0, capnumber) 
-  for (i in 1:capnumber) {
-    print(i/capnumber)
+  deltaesti <- rep(0, itemnumbner) 
+  for (i in 1:itemnumbner) {
+    print(i/itemnumbner)
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -707,16 +855,34 @@ amazon_lordpp_testlevel <- function(item_metrics, rating_sequences, thetas, q = 
   }
   return(list(
     test_level_obs_posi = test_obs_posi,
-    test_level_obs_nega = test_obs_nega,
-    observation_tasks = item_metrics$item_id[obs_index],
-    observation_times = item_metrics$arrival_time[obs_index]
-  ))
+    test_level_obs_nega = test_obs_nega))
 }
 
-#### Saffron #####
+# Function: amazon_saffron_testlevel
+#
+# Implement the SAFFRON algorithm in Section 4 and record the test levels at specific decision times.
+#
+# Inputs:
+#   item_metrics     : the pre-processed dataframe of items.
+#   rating_sequences : the sequence of ratings.
+#   thetas           : true states of tasks.
+#   q                : target FSR level.
+#   Clamb            : parameter lambda in SAFFRON.
+#   obs_index        : pre-specified tasks for recording test levels.
+#   itemnumbner      : number of items.
+#   decision_times   : sequence of decision times.
+#
+# Returns:
+#   test_level_obs_posi : test levels for arm A from the pre-specified tasks.
+#   test_level_obs_nega :test levels for arm B from the pre-specified tasks.
+# 
+# Used in:
+#   Check test levels of SAFFRON algorithm in Section 4.
+#
+# See Section 4 for details.
 
-amazon_saffron_testlevel <- function(item_metrics, rating_sequences, thetas, q = 0.1, Clamb = 0.5, gamma = 0, obs_index, capnumber = capnumber, decision_times = decision_times) {
-  obs_index <- obs_index[obs_index <= capnumber]
+amazon_saffron_testlevel <- function(item_metrics, rating_sequences, thetas, q = 0.1, Clamb = 0.5, obs_index, itemnumbner = itemnumbner, decision_times = decision_times) {
+  obs_index <- obs_index[obs_index <= itemnumbner]
   if (length(obs_index) == 0) {
     stop("No valid observation indices provided")
   }
@@ -725,11 +891,11 @@ amazon_saffron_testlevel <- function(item_metrics, rating_sequences, thetas, q =
   obs_counter <- 1
   selectposi <- integer(0)  
   selectnega <- integer(0)  
-  cplus <- rep(0, capnumber)  
-  cminus <- rep(0, capnumber) 
-  deltaesti <- rep(0, capnumber)  
-  for (i in 1:capnumber) {
-    print(i/capnumber)
+  cplus <- rep(0, itemnumbner)  
+  cminus <- rep(0, itemnumbner) 
+  deltaesti <- rep(0, itemnumbner)  
+  for (i in 1:itemnumbner) {
+    print(i/itemnumbner)
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -772,17 +938,37 @@ amazon_saffron_testlevel <- function(item_metrics, rating_sequences, thetas, q =
   }
   return(list(
     test_level_obs_posi = test_obs_posi,
-    test_level_obs_nega = test_obs_nega,
-    observation_tasks = item_metrics$item_id[obs_index],
-    observation_times = item_metrics$arrival_time[obs_index]
+    test_level_obs_nega = test_obs_nega
   ))
 }
 
-#### Addis #####
+# Function: amazon_saffron_testlevel
+#
+# Implement the ADDIS algorithm in Section 4 and record the test levels at specific decision times.
+#
+# Inputs:
+#   item_metrics     : the pre-processed dataframe of items.
+#   rating_sequences : the sequence of ratings.
+#   thetas           : true states of tasks.
+#   q                : target FSR level.
+#   lamb             : parameter lambda in ADDIS.
+#   tau              : parameter tau in ADDIS.
+#   obs_index        : pre-specified tasks for recording test levels.
+#   itemnumbner      : number of items.
+#   decision_times   : sequence of decision times.
+#
+# Returns:
+#   test_level_obs_posi : test levels for arm A from the pre-specified tasks.
+#   test_level_obs_nega :test levels for arm B from the pre-specified tasks.
+# 
+# Used in:
+#   Check test levels of ADDIS algorithm in Section 4.
+#
+# See Section 4 for details.
 
-amazon_addis_testlevel <- function(item_metrics, rating_sequences, thetas, q = 0.1, Clamb = 0.5, gamma = 0, lamb = 0.25, tau = 0.5, obs_index, capnumber = capnumber, decision_times = decision_times) {
+amazon_addis_testlevel <- function(item_metrics, rating_sequences, thetas, q = 0.1, lamb = 0.25, tau = 0.5, obs_index, itemnumbner = itemnumbner, decision_times = decision_times) {
   
-  obs_index <- obs_index[obs_index <= capnumber]
+  obs_index <- obs_index[obs_index <= itemnumbner]
   if (length(obs_index) == 0) {
     stop("No valid observation indices provided")
   }
@@ -793,13 +979,13 @@ amazon_addis_testlevel <- function(item_metrics, rating_sequences, thetas, q = 0
   selectnega <- integer(0)  
   kstarposi <- integer(0)  
   kstarnega <- integer(0)   
-  splus <- rep(0, capnumber) 
-  sminus <- rep(0, capnumber) 
-  cplus <- rep(0, capnumber)  
-  cminus <- rep(0, capnumber) 
-  deltaesti <- rep(0, capnumber)  
-  for (i in 1:capnumber) {
-    print(i/capnumber)
+  splus <- rep(0, itemnumbner) 
+  sminus <- rep(0, itemnumbner) 
+  cplus <- rep(0, itemnumbner)  
+  cminus <- rep(0, itemnumbner) 
+  deltaesti <- rep(0, itemnumbner)  
+  for (i in 1:itemnumbner) {
+    print(i/itemnumbner)
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -857,28 +1043,27 @@ amazon_addis_testlevel <- function(item_metrics, rating_sequences, thetas, q = 0
   }
   return(list(
     test_level_obs_posi = test_obs_posi,
-    test_level_obs_nega = test_obs_nega,
-    observation_tasks = item_metrics$item_id[obs_index],
-    observation_times = item_metrics$arrival_time[obs_index]
+    test_level_obs_nega = test_obs_nega
   ))
 }
 
-#### Main #####
+#### Compare test levels of different methods in Section 4 (figure 6) #####
 
 obs_index = seq(100,500,100)
 num_obs = length(obs_index)
-re = amazon_sava_testlevel(item_metrics, rating_sequences, thetas, bound = 4, q, k = 100, w0 = q, gamma = 0, obs_index, capnumber = capnumber, decision_times = decision_times)
+re = amazon_sava_testlevel(item_metrics, rating_sequences, thetas, bound = 4, q, k = 100, w0 = q, obs_index, itemnumbner = itemnumbner, decision_times = decision_times)
 threposi.sava = re$test_level_obs
 threnega.sava = re$test_level_obs
-re = amazon_lordpp_testlevel(item_metrics, rating_sequences, thetas, q, gamma = 0, obs_index, capnumber = capnumber, decision_times = decision_times)
+
+re = amazon_lordpp_testlevel(item_metrics, rating_sequences, thetas, q, obs_index, itemnumbner = itemnumbner, decision_times = decision_times)
 threposi.lordpp = re$test_level_obs_posi
 threnega.lordpp = re$test_level_obs_nega
 
-re = amazon_saffron_testlevel(item_metrics, rating_sequences, thetas, q, Clamb = 0.5, gamma = 0, obs_index, capnumber = capnumber, decision_times = decision_times)
+re = amazon_saffron_testlevel(item_metrics, rating_sequences, thetas, q, Clamb = 0.5,  obs_index, itemnumbner = itemnumbner, decision_times = decision_times)
 threposi.saffron = re$test_level_obs_posi
 threnega.saffron = re$test_level_obs_nega
 
-re = amazon_addis_testlevel(item_metrics, rating_sequences, thetas, q, Clamb = 0.5, gamma = 0, lamb = 0.25, tau = 0.5, obs_index, capnumber = capnumber, decision_times = decision_times)
+re = amazon_addis_testlevel(item_metrics, rating_sequences, thetas, q,  lamb = 0.25, tau = 0.5, obs_index, itemnumbner = itemnumbner, decision_times = decision_times)
 threposi.addis = re$test_level_obs_posi
 threnega.addis = re$test_level_obs_nega
 
@@ -900,7 +1085,7 @@ thresholdcompare = tibble(Test_level = c(rep(as.vector(thresava),2), threposi.da
                           Index = c(rep(thresava.dat$index, 2), threposi.dat$Index, threnega.dat$Index),
                           Decision_time = c(rep(thresava.dat$decision_time, 2), threposi.dat$Index, threnega.dat$Index),
                           Method = c(rep('SAVA', 2*length(thresava.dat$index)), threposi.dat$Method, threnega.dat$Method),
-                          Arm = c(rep('B', length(thresava.dat$index)), rep('A', length(thresava.dat$index)), rep('B', length(threposi.dat$Index)), rep('A', length(threnega.dat$Index)))
+                          Arm = c(rep('A', length(thresava.dat$index)), rep('B', length(thresava.dat$index)), rep('A', length(threposi.dat$Index)), rep('B', length(threnega.dat$Index)))
                           )
 write.csv(thresholdcompare, 
           'threshold-compare.csv')

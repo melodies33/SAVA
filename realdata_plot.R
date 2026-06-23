@@ -11,7 +11,7 @@ axissizetext = 20*fd
 legendsize = 20*fd
 titlesize = 26*fd
 totaltitlesize = 30*fd
-#### plot the TSR for different methods #####
+#### plot the TSR for different methods (Figure 5) #####
   dat.f = read.csv('amazon-fashion-comprison.csv')
   dat.b = read.csv('amazon-allbeauty-comprison.csv')
   dat.l = read.csv('amazon-luxurybeauty-comprison.csv')
@@ -69,14 +69,11 @@ totaltitlesize = 30*fd
   
   ggsave('amazon-sava.pdf', plot = p, width = 24, height = 9)
 
-#### plot test levels for selected decision times ####
-
+#### plot test levels for selected decision times (Figure 6) ####
 
 total = read_csv('threshold-compare.csv')
 total = total[-which(total$Index == 500),]
 total$Index = as.factor(total$Index)
-write.csv(total, 'plotdata.csv')
-
 sava_data <- filter(total, Method == "SAVA")
 
 other_methods <- filter(total, Method != "SAVA")
