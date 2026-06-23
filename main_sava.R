@@ -1,3 +1,4 @@
+library(tidyverse)
 library(foreach)
 library(doParallel)
 library(Rcpp)
@@ -147,15 +148,16 @@ n.time = 3000 # number of total times
 q = 0.05 # FDR level
 kvec = seq(2,100,2)
 n.rep = 1000# repeated number
-
+outputlength = n.time*prob.start
 # the case when prob.start = 0.05
 prob.start = 0.05# probability of another hypothesis starting to be observed
+
 {
   mu = 0.1
   plrtio = 0.5
   w0 = q/2
-  FSRmat = matrix(NA, n.time, length(kvec))
-  TSRmat = matrix(NA, n.time, length(kvec))
+  FSRmat = matrix(NA, outputlength, length(kvec))
+  TSRmat = matrix(NA, outputlength, length(kvec))
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6611)
@@ -165,20 +167,31 @@ prob.start = 0.05# probability of another hypothesis starting to be observed
                   .packages = c('dplyr','SAVA')) %dopar%{
                     re = sava_gaussian(n.time, prob.start, plrtio, mu, q, k, w0)
                     fsrvec = re$FSP
+                    if (length(fsrvec) >= outputlength){
+                      fsrvec = fsrvec[1:outputlength]
+                    }else{
+                      fsrvec = c(fsrvec, 
+                                 rep(NA,(outputlength - length(fsrvec))))
+                    }
                     tprtvec = re$TP / sapply(re$realsig, max, 1)
+                    if (length(tprtvec) >= outputlength){
+                      tprtvec = tprtvec[1:outputlength]
+                    }else{
+                      tprtvec = c(tprtvec, rep(NA, outputlength - length(tprtvec)))
+                    }
                     c(fsrvec, tprtvec)
                   }
-    result = rowMeans(ree)
-    FSRmat[,i] = result[1:n.time]
-    TSRmat[,i] = result[(n.time + 1):(2*n.time)]
+    result = rowMeans(ree, na.rm = T)
+    FSRmat[,i] = result[1:outputlength]
+    TSRmat[,i] = result[-(1:outputlength)]
     print(i/length(kvec))
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(kvec)),
+  datare = tibble(time = rep(1:outputlength, length(kvec)),
                   FSR = as.vector(FSRmat),
                   TSR = as.vector(TSRmat),
-                  k = as.factor(rep(kvec, each = n.time)))
+                  k = as.factor(rep(kvec, each = outputlength)))
   
   write_csv(datare, 'sava oracle k curve p0.05.csv')
   
@@ -189,8 +202,8 @@ prob.start = 1/3# probability of another hypothesis starting to be observed
   mu = 0.1
   plrtio = 0.5
   w0 = q/2
-  FSRmat = matrix(NA, n.time, length(kvec))
-  TSRmat = matrix(NA, n.time, length(kvec))
+  FSRmat = matrix(NA, outputlength, length(kvec))
+  TSRmat = matrix(NA, outputlength, length(kvec))
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6611)
@@ -200,20 +213,31 @@ prob.start = 1/3# probability of another hypothesis starting to be observed
                   .packages = c('dplyr','SAVA')) %dopar%{
                     re = sava_gaussian(n.time, prob.start, plrtio, mu, q, k, w0)
                     fsrvec = re$FSP
+                    if (length(fsrvec) >= outputlength){
+                      fsrvec = fsrvec[1:outputlength]
+                    }else{
+                      fsrvec = c(fsrvec, 
+                                 rep(NA,(outputlength - length(fsrvec))))
+                    }
                     tprtvec = re$TP / sapply(re$realsig, max, 1)
+                    if (length(tprtvec) >= outputlength){
+                      tprtvec = tprtvec[1:outputlength]
+                    }else{
+                      tprtvec = c(tprtvec, rep(NA, outputlength - length(tprtvec)))
+                    }
                     c(fsrvec, tprtvec)
                   }
-    result = rowMeans(ree)
-    FSRmat[,i] = result[1:n.time]
-    TSRmat[,i] = result[(n.time + 1):(2*n.time)]
+    result = rowMeans(ree, na.rm = T)
+    FSRmat[,i] = result[1:outputlength]
+    TSRmat[,i] = result[-(1:outputlength)]
     print(i/length(kvec))
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(kvec)),
+  datare = tibble(time = rep(1:outputlength, length(kvec)),
                   FSR = as.vector(FSRmat),
                   TSR = as.vector(TSRmat),
-                  k = as.factor(rep(kvec, each = n.time)))
+                  k = as.factor(rep(kvec, each = outputlength)))
   
   write_csv(datare, 'sava oracle k curve p0.33.csv')
   
@@ -225,8 +249,8 @@ prob.start = 2/3# probability of another hypothesis starting to be observed
   mu = 0.1
   plrtio = 0.5
   w0 = q/2
-  FSRmat = matrix(NA, n.time, length(kvec))
-  TSRmat = matrix(NA, n.time, length(kvec))
+  FSRmat = matrix(NA, outputlength, length(kvec))
+  TSRmat = matrix(NA, outputlength, length(kvec))
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6611)
@@ -236,20 +260,31 @@ prob.start = 2/3# probability of another hypothesis starting to be observed
                   .packages = c('dplyr','SAVA')) %dopar%{
                     re = sava_gaussian(n.time, prob.start, plrtio, mu, q, k, w0)
                     fsrvec = re$FSP
+                    if (length(fsrvec) >= outputlength){
+                      fsrvec = fsrvec[1:outputlength]
+                    }else{
+                      fsrvec = c(fsrvec, 
+                                 rep(NA,(outputlength - length(fsrvec))))
+                    }
                     tprtvec = re$TP / sapply(re$realsig, max, 1)
+                    if (length(tprtvec) >= outputlength){
+                      tprtvec = tprtvec[1:outputlength]
+                    }else{
+                      tprtvec = c(tprtvec, rep(NA, outputlength - length(tprtvec)))
+                    }
                     c(fsrvec, tprtvec)
                   }
-    result = rowMeans(ree)
-    FSRmat[,i] = result[1:n.time]
-    TSRmat[,i] = result[(n.time + 1):(2*n.time)]
+    result = rowMeans(ree, na.rm = T)
+    FSRmat[,i] = result[1:outputlength]
+    TSRmat[,i] = result[-(1:outputlength)]
     print(i/length(kvec))
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(kvec)),
+  datare = tibble(time = rep(1:outputlength, length(kvec)),
                   FSR = as.vector(FSRmat),
                   TSR = as.vector(TSRmat),
-                  k = as.factor(rep(kvec, each = n.time)))
+                  k = as.factor(rep(kvec, each = outputlength)))
   
   write_csv(datare, 'sava oracle k curve p0.66.csv')
   
@@ -277,7 +312,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
     print(i/length(ratioplus))
-    ree = foreach(k = 1:n.rep, .combine = cbind,
+    ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('dplyr','SAVA')) %dopar%{
                     re = sava_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = plrtio, mu = mu, k = k, w0 = w0)
                     fsrvec = re$FSP
@@ -302,10 +337,10 @@ outputlength = n.time*prob.start
   stopImplicitCluster()
   stopCluster(cl)
   
-  datare = tibble(time = rep(1:n.time, length(ratioplus)),
+  datare = tibble(time = rep(1:outputlength, length(ratioplus)),
                   FSR = as.vector(FSR.ratioplus),
                   TSR = as.vector(TSR.ratioplus),
-                  pi = as.factor(rep(ratioplus, each = n.time)))
+                  pi = as.factor(rep(ratioplus, each = outputlength)))
   
   write_csv(datare, 'sava_gaussian_pi.csv')
   
@@ -319,7 +354,7 @@ outputlength = n.time*prob.start
   set.seed(668)
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
-    ree = foreach(k = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
+    ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
       re = sava_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = 0.5, mu = mu, k = k, w0 = w0)
       fsrvec = re$FSP
       if (length(fsrvec) >= outputlength){
@@ -343,10 +378,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(mu.v)),
+  datare = tibble(time = rep(1:outputlength, length(mu.v)),
                   FSR = as.vector(FSR.mu),
                   TSR = as.vector(TSR.mu),
-                  mu = as.factor(rep(mu.v, each = n.time)))
+                  mu = as.factor(rep(mu.v, each = outputlength)))
   
   write_csv(datare, 'sava_gaussian_mu.csv')
 }
@@ -363,7 +398,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
     print(i/length(ratioplus))
-    ree = foreach(k = 1:n.rep, .combine = cbind,
+    ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('dplyr','SAVA')) %dopar%{
                     re = lordpp_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = plrtio, mu = mu)
                     fsrvec = re$FSP
@@ -387,10 +422,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(ratioplus)),
+  datare = tibble(time = rep(1:outputlength, length(ratioplus)),
                   FSR = as.vector(FSR.ratioplus),
                   TSR = as.vector(TSR.ratioplus),
-                  pi = as.factor(rep(ratioplus, each = n.time)))
+                  pi = as.factor(rep(ratioplus, each = outputlength)))
   
   write_csv(datare, 'lordpp_gaussian_pi.csv')
   
@@ -405,7 +440,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
     print(i/length(mu.v))
-    ree = foreach(k = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
+    ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
       re = lordpp_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = 0.5, mu = mu)
       fsrvec = re$FSP
       if (length(fsrvec) >= outputlength){
@@ -428,10 +463,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(mu.v)),
+  datare = tibble(time = rep(1:outputlength, length(mu.v)),
                   FSR = as.vector(FSR.mu),
                   TSR = as.vector(TSR.mu),
-                  mu = as.factor(rep(mu.v, each = n.time)))
+                  mu = as.factor(rep(mu.v, each = outputlength)))
   
   write_csv(datare, 'lordpp_gaussian_mu.csv')
 }
@@ -447,7 +482,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
     print(i/length(ratioplus))
-    ree = foreach(k = 1:n.rep, .combine = cbind,
+    ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('dplyr','SAVA')) %dopar%{
                     re = saffron_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = plrtio, mu = mu)
                     fsrvec = re$FSP
@@ -471,10 +506,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(ratioplus)),
+  datare = tibble(time = rep(1:outputlength, length(ratioplus)),
                   FSR = as.vector(FSR.ratioplus),
                   TSR = as.vector(TSR.ratioplus),
-                  pi = as.factor(rep(ratioplus, each = n.time)))
+                  pi = as.factor(rep(ratioplus, each = outputlength)))
   
   write_csv(datare, 'saffron_gaussian_pi.csv')
   
@@ -489,7 +524,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
     print(i/length(mu.v))
-    ree = foreach(k = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
+    ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
       re = saffron_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = 0.5, mu = mu)
       fsrvec = re$FSP
       if (length(fsrvec) >= outputlength){
@@ -512,10 +547,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(mu.v)),
+  datare = tibble(time = rep(1:outputlength, length(mu.v)),
                   FSR = as.vector(FSR.mu),
                   TSR = as.vector(TSR.mu),
-                  mu = as.factor(rep(mu.v, each = n.time)))
+                  mu = as.factor(rep(mu.v, each = outputlength)))
  
   write_csv(datare, 'saffron_gaussian_mu.csv')
 }
@@ -531,7 +566,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
     print(i/length(ratioplus))
-    ree = foreach(k = 1:n.rep, .combine = cbind,
+    ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('dplyr','SAVA')) %dopar%{
                     re = addis_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = plrtio, mu = mu)
                     fsrvec = re$FSP
@@ -555,10 +590,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(ratioplus)),
+  datare = tibble(time = rep(1:outputlength, length(ratioplus)),
                   FSR = as.vector(FSR.ratioplus),
                   TSR = as.vector(TSR.ratioplus),
-                  pi = as.factor(rep(ratioplus, each = n.time)))
+                  pi = as.factor(rep(ratioplus, each = outputlength)))
  
   write_csv(datare, 'addis_gaussian_pi.csv')
   
@@ -573,7 +608,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
     print(i/length(mu.v))
-    ree = foreach(k = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
+    ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
       re = addis_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = 0.5, mu = mu)
       fsrvec = re$FSP
       if (length(fsrvec) >= outputlength){
@@ -596,10 +631,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(mu.v)),
+  datare = tibble(time = rep(1:outputlength, length(mu.v)),
                   FSR = as.vector(FSR.mu),
                   TSR = as.vector(TSR.mu),
-                  mu = as.factor(rep(mu.v, each = n.time)))
+                  mu = as.factor(rep(mu.v, each = outputlength)))
   
   write_csv(datare, 'addis_gaussian_mu.csv')
 }
@@ -628,7 +663,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
     print(i/length(ratioplus))
-    ree = foreach(k = 1:n.rep, .combine = cbind,
+    ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = sava_general(n.time = n.time, bound = bound, prob.start = prob.start, q = q, ratio.plus = plrtio, mu = mu, sigma = sigma, k = k, w0 = w0)
                     fsrvec = re$FSP
@@ -652,10 +687,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(ratioplus)),
+  datare = tibble(time = rep(1:outputlength, length(ratioplus)),
                   FSR = as.vector(FSR.ratioplus),
                   TSR = as.vector(TSR.ratioplus),
-                  pi = as.factor(rep(ratioplus, each = n.time)))
+                  pi = as.factor(rep(ratioplus, each = outputlength)))
  
   write_csv(datare, 'sava_general_pi.csv')
   
@@ -669,7 +704,7 @@ outputlength = n.time*prob.start
   set.seed(668)
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
-    ree = foreach(k = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
+    ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = sava_general(n.time = n.time, bound = bound, prob.start = prob.start, q = q, ratio.plus = 0.5, mu = mu, sigma = sigma, k = k, w0 = w0)
       fsrvec = re$FSP
       if (length(fsrvec) >= outputlength){
@@ -693,10 +728,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(mu.v)),
+  datare = tibble(time = rep(1:outputlength, length(mu.v)),
                   FSR = as.vector(FSR.mu),
                   TSR = as.vector(TSR.mu),
-                  mu = as.factor(rep(mu.v, each = n.time)))
+                  mu = as.factor(rep(mu.v, each = outputlength)))
  
   write_csv(datare, 'sava_general_mu.csv')
 }
@@ -714,7 +749,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
     print(i/length(ratioplus))
-    ree = foreach(k = 1:n.rep, .combine = cbind,
+    ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_general(n.time = n.time, bound = bound, prob.start = prob.start, q = q, ratio.plus = plrtio,mu = mu,sigma = sigma)
                     fsrvec = re$FSP
@@ -738,10 +773,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(ratioplus)),
+  datare = tibble(time = rep(1:outputlength, length(ratioplus)),
                   FSR = as.vector(FSR.ratioplus),
                   TSR = as.vector(TSR.ratioplus),
-                  pi = as.factor(rep(ratioplus, each = n.time)))
+                  pi = as.factor(rep(ratioplus, each = outputlength)))
   
   write_csv(datare, 'lordpp_general_pi.csv')
 }
@@ -755,7 +790,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
     print(i/length(mu.v))
-    ree = foreach(k = 1:n.rep, .combine = cbind,
+    ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_general(n.time = n.time, bound = bound, prob.start = prob.start, q = q, ratio.plus = 0.5,mu = mu,sigma = sigma)
                     fsrvec = re$FSP
@@ -779,10 +814,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(mu.v)),
+  datare = tibble(time = rep(1:outputlength, length(mu.v)),
                   FSR = as.vector(FSR.mu),
                   TSR = as.vector(TSR.mu),
-                  mu = as.factor(rep(mu.v, each = n.time)))
+                  mu = as.factor(rep(mu.v, each = outputlength)))
  
   write_csv(datare, 'lordpp_general_mu.csv')
 }
@@ -800,7 +835,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
     print(i/length(ratioplus))
-    ree = foreach(k = 1:n.rep, .combine = cbind,
+    ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = saffron_general(n.time = n.time, bound = bound, prob.start = prob.start, q = q,ratio.plus = plrtio, mu = mu, sigma = sigma)
                     fsrvec = re$FSP
@@ -824,10 +859,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(ratioplus)),
+  datare = tibble(time = rep(1:outputlength, length(ratioplus)),
                   FSR = as.vector(FSR.ratioplus),
                   TSR = as.vector(TSR.ratioplus),
-                  pi = as.factor(rep(ratioplus, each = n.time)))
+                  pi = as.factor(rep(ratioplus, each = outputlength)))
  
   write_csv(datare, 'saffron_general_pi.csv')
   
@@ -843,8 +878,8 @@ outputlength = n.time*prob.start
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
     print(i/length(mu.v))
-    ree = foreach(k = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
-      re = saffron_general(n.time = n.time, bound = bound, prob.start = prob.start, q = q,ratio.plus = 0.5, mu = mu, sigma = sigma,)
+    ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
+      re = saffron_general(n.time = n.time, bound = bound, prob.start = prob.start, q = q,ratio.plus = 0.5, mu = mu, sigma = sigma)
       fsrvec = re$FSP
       if (length(fsrvec) >= outputlength){
         fsrvec = fsrvec[1:outputlength]
@@ -866,10 +901,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(mu.v)),
+  datare = tibble(time = rep(1:outputlength, length(mu.v)),
                   FSR = as.vector(FSR.mu),
                   TSR = as.vector(TSR.mu),
-                  mu = as.factor(rep(mu.v, each = n.time)))
+                  mu = as.factor(rep(mu.v, each = outputlength)))
   write_csv(datare, 'saffron_general_mu.csv')
   
 }
@@ -887,7 +922,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
     print(i/length(ratioplus))
-    ree = foreach(k = 1:n.rep, .combine = cbind,
+    ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = addis_general(n.time = n.time,bound =  bound, prob.start = prob.start, q = q,ratio.plus = plrtio, mu = mu, sigma = sigma)
                     fsrvec = re$FSP
@@ -911,10 +946,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(ratioplus)),
+  datare = tibble(time = rep(1:outputlength, length(ratioplus)),
                   FSR = as.vector(FSR.ratioplus),
                   TSR = as.vector(TSR.ratioplus),
-                  pi = as.factor(rep(ratioplus, each = n.time)))
+                  pi = as.factor(rep(ratioplus, each = outputlength)))
   write_csv(datare, 'addis_general_pi.csv')
   
   
@@ -929,7 +964,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
     print(i/length(mu.v))
-    ree = foreach(k = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
+    ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = addis_general(n.time = n.time,bound =  bound, prob.start = prob.start, q = q,ratio.plus = 0.5, mu = mu, sigma = sigma)
       fsrvec = re$FSP
       if (length(fsrvec) >= outputlength){
@@ -952,10 +987,10 @@ outputlength = n.time*prob.start
   }
   stopImplicitCluster()
   stopCluster(cl)
-  datare = tibble(time = rep(1:n.time, length(mu.v)),
+  datare = tibble(time = rep(1:outputlength, length(mu.v)),
                   FSR = as.vector(FSR.mu),
                   TSR = as.vector(TSR.mu),
-                  mu = as.factor(rep(mu.v, each = n.time)))
+                  mu = as.factor(rep(mu.v, each = outputlength)))
   
   write_csv(datare, 'addis_general_mu.csv')
   
@@ -1220,7 +1255,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(mumulti.v)){
     mumulti = mumulti.v[i]
     print(i/length(mumulti.v))
-    ree = foreach(k = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
+    ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = saffron_gamma(gammak , n.time, prob.start, q, ratio.plus, mu, mumulti)
       fsrvec = re$FSP
       if (length(fsrvec) >= outputlength){
@@ -1268,7 +1303,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
     print(i/length(ratioplus))
-    ree = foreach(k = 1:n.rep, .combine = cbind,
+    ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = addis_gamma(gammak, n.time, prob.start, q, plrtio, mu, mumulti)
                     fsrvec = re$FSP
@@ -1315,7 +1350,7 @@ outputlength = n.time*prob.start
   for(i in 1:length(mumulti.v)){
     mumulti = mumulti.v[i]
     print(i/length(mumulti.v))
-    ree = foreach(k = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
+    ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = addis_gamma(gammak, n.time, prob.start, q, ratio.plus, mu, mumulti)
       fsrvec = re$FSP
       if (length(fsrvec) >= outputlength){

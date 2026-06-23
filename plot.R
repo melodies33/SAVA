@@ -127,9 +127,25 @@ re1 = read_csv('sava oracle k curve p0.05.csv')
 re2 = read_csv('sava oracle k curve p0.33.csv')
 re3 = read_csv('sava oracle k curve p0.66.csv')
 
-re1 = re1[which(re1$time == 3000),]
-re2 = re2[which(re2$time == 3000),]
-re3 = re3[which(re3$time == 3000),]
+re1 <- re1 %>%
+  filter(!is.na(TSR), !is.na(FSR)) %>%
+  group_by(k) %>%
+  arrange(desc(time)) %>%
+  slice(1) %>%
+  ungroup()
+re2 <- re2 %>%
+  filter(!is.na(TSR), !is.na(FSR)) %>%
+  group_by(k) %>%
+  arrange(desc(time)) %>%
+  slice(1) %>%
+  ungroup()
+re3 <- re3 %>%
+  filter(!is.na(TSR), !is.na(FSR)) %>%
+  group_by(k) %>%
+  arrange(desc(time)) %>%
+  slice(1) %>%
+  ungroup()
+
 l = length(re1$time)
 fsr = c(re1$FSR, re2$FSR, re3$FSR)
 tsr = c(re1$TSR, re2$TSR, re3$TSR)

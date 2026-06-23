@@ -1048,8 +1048,59 @@ amazon_addis_testlevel <- function(item_metrics, rating_sequences, thetas, q = 0
 }
 
 #### Compare test levels of different methods in Section 4 (figure 6) #####
+amazon_data <- fread("real-amazon25/AMAZON_FASHION.csv",
+                     col.names = c("item_id", "user_id", "rating", "timestamp"))
+
+processed_data <- amazon_data %>%
+  filter(rating >= 1 & rating <= 5) %>%
+  arrange(item_id, timestamp)
+
+item_metrics <- processed_data %>%
+  group_by(item_id) %>%
+  summarise(
+    first_review_time = min(timestamp),
+    total_reviews = n(),
+    avg_rating = mean(rating)
+  ) %>%
+  arrange(first_review_time) %>%
+  filter(total_reviews > 50)  
+
+min_time <- min(item_metrics$first_review_time)
+item_metrics <- item_metrics %>%
+  mutate(arrival_day = as.integer((first_review_time - min_time) / 86400)) %>%
+  arrange(arrival_day, item_id)
+
+item_metrics <- item_metrics %>%
+  group_by(arrival_day) %>%
+  slice(1) %>% 
+  ungroup() %>%
+  mutate(arrival_time = arrival_day) %>%  
+  select(-arrival_day, -first_review_time)
+
+thetas <- numeric(nrow(item_metrics))
+thetas[item_metrics$avg_rating >= 3] <- 1  
+thetas[item_metrics$avg_rating < 3] <- -1  
+arrival_map <- item_metrics %>% select(item_id, arrival_time)
+
+rating_sequences <- processed_data %>%
+  inner_join(arrival_map, by = "item_id") %>%
+  arrange(item_id, timestamp) %>%
+  group_by(item_id) %>%
+  mutate(review_seq = row_number(),
+         review_time = as.integer((timestamp - min_time) / 86400)) %>%
+  ungroup()
+
+rating_sequences$rating = rating_sequences$rating - 3
+
+item_metrics <- item_metrics %>% arrange(arrival_time)
+itemnumbner <- nrow(item_metrics)
+
+time_max = max(rating_sequences$review_time)
+decision_times <- c(item_metrics$arrival_time[-1],time_max)
+num_decision = length(decision_times)
 
 obs_index = seq(100,500,100)
+time_obs = seq(100, 900, 50)
 num_obs = length(obs_index)
 re = amazon_sava_testlevel(item_metrics, rating_sequences, thetas, bound = 4, q, k = 100, w0 = q, obs_index, itemnumbner = itemnumbner, decision_times = decision_times)
 threposi.sava = re$test_level_obs
@@ -1088,4 +1139,4 @@ thresholdcompare = tibble(Test_level = c(rep(as.vector(thresava),2), threposi.da
                           Arm = c(rep('A', length(thresava.dat$index)), rep('B', length(thresava.dat$index)), rep('A', length(threposi.dat$Index)), rep('B', length(threnega.dat$Index)))
                           )
 write.csv(thresholdcompare, 
-          'threshold-compare.csv')
+          'threshold-compare.csv', row.names = F)
