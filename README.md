@@ -25,7 +25,10 @@ Alternatively, install directly from GitHub:
 
 ```r
 library(devtools)
-devtools::install_github("melodies33/SAVA")
+devtools::install_github(
+  "melodies33/SAVA",
+  subdir = "SAVA"
+)
 ```
 ## Reproducing the Results
 Run the following scripts in order:
