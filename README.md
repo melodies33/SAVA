@@ -12,9 +12,8 @@ This repository contains the code and reproducibility materials for the paper "S
 - plot.R: generates the corresponding simulation figures.
 - real-amazon.R: reproduces the real-data analysis in Section 4.
 - realdata_plot.R: generates the corresponding real-data figures.
-- AMAZON_All_Beauty.zip: contains the data for real data analysis in Section 4.
-- AMAZON_FASHION.zip: contains the data for real data analysis in Section 4.
-- AMAZON_Luxury_Beauty.zip: contains the data for real data analysis in Section 4. 
+- AMAZON_All_Beauty.zip, AMAZON_FASHION.zip and AMAZON_Luxury_Beauty.zip: contains the data for real data analysis in Section 4.
+
 ## Installation
 The package source files are contained in the SAVA directory.
 
@@ -24,9 +23,8 @@ To install the package locally, open a terminal in the repository directory and 
 
 Alternatively, install directly from GitHub:
 
-`library(devtools)
-
-devtools::install_github("melodies33/SAVA")`
+r library(devtools)
+devtools::install_github("melodies33/SAVA")
 
 ## Reproducing the Results
 Run the following scripts in order:
