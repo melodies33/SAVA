@@ -1,0 +1,11 @@
+Package: SAVA
+Type: Package
+Title: Safe, Always-Valid Alpha-Investing Rules For Doubly Sequential Online Inference
+Version: 1.0
+Date: 2026-06-22
+Author: Zeyu Yao, Bowen Gang, Wenguang Sun
+Maintainer: Questions and comments to <bgang@fudan.edu.cn>
+Description: Implements the Safe Always-Valid Alpha-Investing (SAVA) procedures proposed in the paper ``Safe, Always-Valid Alpha-Investing Rules for Doubly Sequential Online Inference''. The package contains functions used in the simulation studies and data analyses reported in the manuscript.
+License: GPL (>= 2)
+Imports: Rcpp (>= 1.0.12)
+LinkingTo: Rcpp
