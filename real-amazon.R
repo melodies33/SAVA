@@ -1,3 +1,7 @@
+# Main script for running all algorithms under real data analysis in Section 4.
+
+# The script generates CSV files that record the performance of the competing methods. Once the CSV files are generated, execute the corresponding code blocks in realdata_plot.R to reproduce the figures reported in the paper.
+
 library(truncnorm)
 library(tidyverse)
 library(Rcpp)
@@ -55,8 +59,9 @@ amazon_sava <- function(item_metrics, rating_sequences, thetas, bound = 4, q = 0
   realtotal <- numeric(num_decisions)
   positotal <- numeric(num_decisions)
   negatotal <- numeric(num_decisions)
+  pb <- txtProgressBar(min = 0, max = num_decisions, style = 3)
   for (ti in 1:num_decisions) {
-    print(ti/num_decisions)
+    
     current_time <- decision_times[ti]
     active_tasks <- which(item_metrics$arrival_time <= current_time & stoptime > current_time)
     if (length(active_tasks) > 0) {
@@ -114,7 +119,9 @@ amazon_sava <- function(item_metrics, rating_sequences, thetas, bound = 4, q = 0
         realtotal[ti] <- realtotal[ti-1]
       }
     }
+    setTxtProgressBar(pb, ti)
   }
+  close(pb)
   fsp <- falsetotal / pmax(decidetotal, 1)
   
   return(list(
@@ -157,8 +164,9 @@ amazon_lordpp <- function(item_metrics, rating_sequences, thetas, q = 0.1, itemn
   positotal <- numeric(itemnumbner)
   negatotal <- numeric(itemnumbner)
   realtotal <- numeric(itemnumbner)
+  pb <- txtProgressBar(min = 0, max = itemnumbner, style = 3)
   for (i in 1:itemnumbner) {
-    print(i/itemnumbner)
+    
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -200,7 +208,9 @@ amazon_lordpp <- function(item_metrics, rating_sequences, thetas, q = 0.1, itemn
         realtotal[i] <- realtotal[i-1]
       }
     }
+    setTxtProgressBar(pb, i)
   }
+  close(pb)
   fsp <- falsetotal / pmax(decidetotal, 1)
   return(list(
     FSP = fsp,
@@ -245,8 +255,9 @@ amazon_saffron <- function(item_metrics, rating_sequences, thetas, q = 0.1, Clam
   realtotal <- numeric(itemnumbner)
   positotal <- numeric(itemnumbner)
   negatotal <- numeric(itemnumbner)
+  pb <- txtProgressBar(min = 0, max = itemnumbner, style = 3)
   for (i in 1:itemnumbner) {
-    print(i/itemnumbner)
+   
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -293,8 +304,9 @@ amazon_saffron <- function(item_metrics, rating_sequences, thetas, q = 0.1, Clam
         realtotal[i] <- realtotal[i-1]
       }
     }
+    setTxtProgressBar(pb, i)
   }
-  
+  close(pb)
   fsp <- falsetotal / pmax(decidetotal, 1)
   return(list(
     FSP = fsp,
@@ -344,8 +356,8 @@ amazon_addis <- function(item_metrics, rating_sequences, thetas, q = 0.1, lamb =
   realtotal <- numeric(itemnumbner)
   positotal = numeric(itemnumbner)
   negatotal = numeric(itemnumbner)
+  pb <- txtProgressBar(min = 0, max = itemnumbner, style = 3)
   for (i in 1:itemnumbner) {
-    print(i/itemnumbner)
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -404,7 +416,9 @@ amazon_addis <- function(item_metrics, rating_sequences, thetas, q = 0.1, lamb =
         realtotal[i] <- realtotal[i-1]
       }
     }
+    setTxtProgressBar(pb, i)
   }
+  close(pb)
   fsp <- falsetotal / pmax(decidetotal, 1)
   return(list(
     FSP = fsp,
@@ -738,8 +752,9 @@ amazon_sava_testlevel <- function(item_metrics, rating_sequences, thetas, bound 
   thresholdvec <- rep(0, itemnumbner)
   thresholdvec[1:min(k, itemnumbner)] <- w0/k
   selectlarger1 <- 0  
+  pb <- txtProgressBar(min = 0, max = num_decisions, style = 3)
   for (ti in 1:num_decisions) {
-    print(ti/num_decisions)
+    
     current_time <- decision_times[ti]
     active_tasks <- which(item_metrics$arrival_time <= current_time & stoptime > current_time)
     if (ti %in% time_obs){
@@ -777,7 +792,9 @@ amazon_sava_testlevel <- function(item_metrics, rating_sequences, thetas, bound 
       }
     }
     
+    setTxtProgressBar(pb, ti)
   }
+  close(pb)
   return(list(
     test_level_obs = test_obs
   ))
@@ -817,8 +834,9 @@ amazon_lordpp_testlevel <- function(item_metrics, rating_sequences, thetas, q = 
   selectposi <- integer(0) 
   selectnega <- integer(0) 
   deltaesti <- rep(0, itemnumbner) 
+  pb <- txtProgressBar(min = 0, max = itemnumbner, style = 3)
   for (i in 1:itemnumbner) {
-    print(i/itemnumbner)
+    
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -852,7 +870,9 @@ amazon_lordpp_testlevel <- function(item_metrics, rating_sequences, thetas, q = 
       test_obs_nega[obs_counter] <- thresholdnega
       obs_counter <- obs_counter + 1
     }
+    setTxtProgressBar(pb, i)
   }
+  close(pb)
   return(list(
     test_level_obs_posi = test_obs_posi,
     test_level_obs_nega = test_obs_nega))
@@ -894,8 +914,8 @@ amazon_saffron_testlevel <- function(item_metrics, rating_sequences, thetas, q =
   cplus <- rep(0, itemnumbner)  
   cminus <- rep(0, itemnumbner) 
   deltaesti <- rep(0, itemnumbner)  
+  pb <- txtProgressBar(min = 0, max = itemnumbner, style = 3)
   for (i in 1:itemnumbner) {
-    print(i/itemnumbner)
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -935,7 +955,9 @@ amazon_saffron_testlevel <- function(item_metrics, rating_sequences, thetas, q =
       test_obs_nega[obs_counter] <- thresholdnega
       obs_counter <- obs_counter + 1
     }
+    setTxtProgressBar(pb, i)
   }
+  close(pb)
   return(list(
     test_level_obs_posi = test_obs_posi,
     test_level_obs_nega = test_obs_nega
@@ -984,8 +1006,8 @@ amazon_addis_testlevel <- function(item_metrics, rating_sequences, thetas, q = 0
   cplus <- rep(0, itemnumbner)  
   cminus <- rep(0, itemnumbner) 
   deltaesti <- rep(0, itemnumbner)  
+  pb <- txtProgressBar(min = 0, max = itemnumbner, style = 3)
   for (i in 1:itemnumbner) {
-    print(i/itemnumbner)
     current_time <- decision_times[i]
     current_item <- item_metrics$item_id[i]
     current_ratings <- rating_sequences %>%
@@ -1040,7 +1062,9 @@ amazon_addis_testlevel <- function(item_metrics, rating_sequences, thetas, q = 0
       test_obs_nega[obs_counter] <- thresholdnega
       obs_counter <- obs_counter + 1
     }
+    setTxtProgressBar(pb, i)
   }
+  close(pb)
   return(list(
     test_level_obs_posi = test_obs_posi,
     test_level_obs_nega = test_obs_nega

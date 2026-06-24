@@ -1,3 +1,7 @@
+# Main script for running all algorithms under different experimental settings in Section B.
+
+# The script generates CSV files that record the performance of the competing methods. Once the CSV files are generated, execute the corresponding code blocks in plot.R to reproduce the figures reported in the paper.
+
 library(tidyverse)
 library(foreach)
 library(doParallel)
@@ -6,6 +10,8 @@ library(onlineFDR)
 library(SAVA)
 library(BSDA)
 source('functions_sava.R')
+
+
 #### Counterexample 1 (Section E.1, Figure E.1) ####
 n.time = 100 # number of total times
 prob.start = 1# probability of another hypothesis starting to be observed
@@ -161,6 +167,7 @@ prob.start = 0.05# probability of another hypothesis starting to be observed
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(kvec), style = 3)
   for(i in 1:length(kvec)){
     k = kvec[i]
     ree = foreach(j = 1:n.rep, .combine = cbind,
@@ -184,8 +191,9 @@ prob.start = 0.05# probability of another hypothesis starting to be observed
     result = rowMeans(ree, na.rm = T)
     FSRmat[,i] = result[1:outputlength]
     TSRmat[,i] = result[-(1:outputlength)]
-    print(i/length(kvec))
+    setTxtProgressBar(pb, i)
   }
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(kvec)),
@@ -207,6 +215,7 @@ prob.start = 1/3# probability of another hypothesis starting to be observed
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(kvec), style = 3)
   for(i in 1:length(kvec)){
     k = kvec[i]
     ree = foreach(j = 1:n.rep, .combine = cbind,
@@ -230,8 +239,10 @@ prob.start = 1/3# probability of another hypothesis starting to be observed
     result = rowMeans(ree, na.rm = T)
     FSRmat[,i] = result[1:outputlength]
     TSRmat[,i] = result[-(1:outputlength)]
-    print(i/length(kvec))
+    
+    setTxtProgressBar(pb, i)
   }
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(kvec)),
@@ -254,6 +265,7 @@ prob.start = 2/3# probability of another hypothesis starting to be observed
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(kvec), style = 3)
   for(i in 1:length(kvec)){
     k = kvec[i]
     ree = foreach(j = 1:n.rep, .combine = cbind,
@@ -277,8 +289,9 @@ prob.start = 2/3# probability of another hypothesis starting to be observed
     result = rowMeans(ree, na.rm = T)
     FSRmat[,i] = result[1:outputlength]
     TSRmat[,i] = result[-(1:outputlength)]
-    print(i/length(kvec))
+    setTxtProgressBar(pb, i)
   }
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(kvec)),
@@ -309,9 +322,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('dplyr','SAVA')) %dopar%{
                     re = sava_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = plrtio, mu = mu, k = k, w0 = w0)
@@ -333,7 +346,9 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   
@@ -352,6 +367,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(mu.v), style = 3)
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
@@ -374,8 +390,9 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(mu.v))
+    setTxtProgressBar(pb, i)
   }
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mu.v)),
@@ -395,9 +412,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('dplyr','SAVA')) %dopar%{
                     re = lordpp_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = plrtio, mu = mu)
@@ -419,7 +436,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -437,9 +457,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(mu.v), style = 3)
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
-    print(i/length(mu.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
       re = lordpp_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = 0.5, mu = mu)
       fsrvec = re$FSP
@@ -460,7 +480,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mu.v)),
@@ -479,9 +502,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('dplyr','SAVA')) %dopar%{
                     re = saffron_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = plrtio, mu = mu)
@@ -503,7 +526,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -521,9 +547,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(mu.v), style = 3)
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
-    print(i/length(mu.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
       re = saffron_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = 0.5, mu = mu)
       fsrvec = re$FSP
@@ -544,7 +570,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mu.v)),
@@ -563,9 +592,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('dplyr','SAVA')) %dopar%{
                     re = addis_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = plrtio, mu = mu)
@@ -587,7 +616,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -605,9 +637,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(mu.v), style = 3)
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
-    print(i/length(mu.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('dplyr','SAVA')) %dopar%{
       re = addis_gaussian(n.time = n.time, prob.start = prob.start, q = q, ratio.plus = 0.5, mu = mu)
       fsrvec = re$FSP
@@ -628,7 +660,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mu.v)),
@@ -660,6 +695,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
     print(i/length(ratioplus))
@@ -684,7 +720,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -702,6 +741,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(mu.v), style = 3)
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -724,8 +764,11 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(mu.v))
+    
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mu.v)),
@@ -746,9 +789,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(66)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_general(n.time = n.time, bound = bound, prob.start = prob.start, q = q, ratio.plus = plrtio,mu = mu,sigma = sigma)
@@ -770,7 +813,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -787,9 +833,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mu.v), style = 3)
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
-    print(i/length(mu.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_general(n.time = n.time, bound = bound, prob.start = prob.start, q = q, ratio.plus = 0.5,mu = mu,sigma = sigma)
@@ -811,7 +857,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mu.v)),
@@ -832,9 +881,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = saffron_general(n.time = n.time, bound = bound, prob.start = prob.start, q = q,ratio.plus = plrtio, mu = mu, sigma = sigma)
@@ -856,7 +905,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -875,9 +927,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mu.v), style = 3)
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
-    print(i/length(mu.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = saffron_general(n.time = n.time, bound = bound, prob.start = prob.start, q = q,ratio.plus = 0.5, mu = mu, sigma = sigma)
       fsrvec = re$FSP
@@ -898,7 +950,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mu.v)),
@@ -919,9 +974,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = addis_general(n.time = n.time,bound =  bound, prob.start = prob.start, q = q,ratio.plus = plrtio, mu = mu, sigma = sigma)
@@ -943,7 +998,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -961,9 +1019,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mu.v), style = 3)
   for(i in 1:length(mu.v)){
     mu = mu.v[i]
-    print(i/length(mu.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = addis_general(n.time = n.time,bound =  bound, prob.start = prob.start, q = q,ratio.plus = 0.5, mu = mu, sigma = sigma)
       fsrvec = re$FSP
@@ -984,7 +1042,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mu.v)),
@@ -1020,9 +1081,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = sava_gamma(gammak, n.time, prob.start, plrtio, mu, q, mumulti, k, w0)
@@ -1044,7 +1105,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -1066,6 +1130,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(mumulti.v), style = 3)
   for(i in 1:length(mumulti.v)){
     mumulti = mumulti.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -1088,8 +1153,11 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(mumulti.v))
+    
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mumulti.v)),
@@ -1112,9 +1180,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(66)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_gamma(gammak, n.time, prob.start, q, plrtio, mu, mumulti)
@@ -1136,7 +1204,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -1157,9 +1228,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mumulti.v), style = 3)
   for(i in 1:length(mumulti.v)){
     mumulti = mumulti.v[i]
-    print(i/length(mumulti.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_gamma(gammak, n.time, prob.start, q, ratio.plus, mu, mumulti)
@@ -1181,7 +1252,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mumulti.v)),
@@ -1205,9 +1279,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = saffron_gamma(gammak , n.time, prob.start, q, plrtio, mu, mumulti)
@@ -1229,7 +1303,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -1252,9 +1329,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mumulti.v), style = 3)
   for(i in 1:length(mumulti.v)){
     mumulti = mumulti.v[i]
-    print(i/length(mumulti.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = saffron_gamma(gammak , n.time, prob.start, q, ratio.plus, mu, mumulti)
       fsrvec = re$FSP
@@ -1275,7 +1352,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mumulti.v)),
@@ -1300,9 +1380,10 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = addis_gamma(gammak, n.time, prob.start, q, plrtio, mu, mumulti)
@@ -1324,7 +1405,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -1347,9 +1431,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mumulti.v), style = 3)
   for(i in 1:length(mumulti.v)){
     mumulti = mumulti.v[i]
-    print(i/length(mumulti.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = addis_gamma(gammak, n.time, prob.start, q, ratio.plus, mu, mumulti)
       fsrvec = re$FSP
@@ -1370,7 +1454,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mumulti.v)),
@@ -1410,9 +1497,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = sava_beta(n.time, prob.start, plrtio, mu0, mudelta, beta0, q, k , w0)
@@ -1434,7 +1521,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -1456,6 +1546,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -1478,8 +1569,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(mudelta.v))
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -1503,9 +1596,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(66)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_beta(n.time, prob.start, q, plrtio, mu0, mudelta, beta0)
@@ -1527,7 +1620,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -1548,9 +1644,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_beta(n.time, prob.start, q, plrtio, mu0, mudelta, beta0)
@@ -1572,7 +1668,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -1596,9 +1695,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = saffron_beta(n.time, prob.start, q, plrtio, mu0, mudelta, beta0)
@@ -1620,7 +1719,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -1643,9 +1745,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = saffron_beta(n.time, prob.start, q, ratio.plus, mu0, mudelta, beta0)
       fsrvec = re$FSP
@@ -1666,7 +1768,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -1691,9 +1796,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = addis_beta(n.time, prob.start, q, plrtio, mu0, mudelta, beta0)
@@ -1715,7 +1820,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -1738,9 +1846,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = addis_beta(n.time, prob.start, q, ratio.plus, mu0, mudelta, beta0)
       fsrvec = re$FSP
@@ -1761,7 +1869,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -1798,9 +1909,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = sava_beta_coin(n.time, prob.start, plrtio, mu0, mudelta, beta0, q, k, w0)
@@ -1822,7 +1933,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -1844,6 +1958,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -1866,8 +1981,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(mudelta.v))
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -1890,9 +2007,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(66)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_beta(n.time, prob.start, q, plrtio, mu0, mudelta, beta0)
@@ -1914,7 +2031,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -1935,9 +2055,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_beta(n.time, prob.start, q, plrtio, mu0, mudelta, beta0)
@@ -1959,7 +2079,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -1983,9 +2106,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = saffron_beta(n.time, prob.start, q, plrtio, mu0, mudelta, beta0)
@@ -2007,7 +2130,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -2030,9 +2156,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = saffron_beta(n.time, prob.start, q, ratio.plus, mu0, mudelta, beta0)
       fsrvec = re$FSP
@@ -2053,7 +2179,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -2078,9 +2207,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = addis_beta(n.time, prob.start, q, plrtio, mu0, mudelta, beta0)
@@ -2102,7 +2231,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -2125,9 +2257,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = addis_beta(n.time, prob.start, q, ratio.plus, mu0, mudelta, beta0)
       fsrvec = re$FSP
@@ -2148,7 +2280,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -2188,9 +2323,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = sava_gauss_sub(subsigma = 1, n.time, prob.start, plrtio, mu0, mudelta, q, k, w0)
@@ -2212,7 +2347,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -2234,6 +2372,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -2256,8 +2395,11 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(mudelta.v))
+    
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -2280,9 +2422,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(66)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_gauss_sub(subsigma, n.time, prob.start, q, plrtio, mu0, mudelta)
@@ -2304,7 +2446,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -2325,9 +2470,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_gauss_sub(subsigma, n.time, prob.start, q, ratio.plus, mu0, mudelta)
@@ -2349,7 +2494,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -2373,9 +2521,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = saffron_gauss_sub(subsigma, n.time, prob.start, q, plrtio, mu0, mudelta)
@@ -2397,7 +2545,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -2420,9 +2571,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = saffron_gauss_sub(subsigma, n.time, prob.start, q, ratio.plus, mu0, mudelta)
       fsrvec = re$FSP
@@ -2443,7 +2594,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -2468,9 +2622,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = addis_gauss_sub(subsigma, n.time, prob.start, q, plrtio, mu0, mudelta)
@@ -2492,7 +2646,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -2515,9 +2672,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = addis_gauss_sub(subsigma, n.time, prob.start, q, ratio.plus, mu0, mudelta)
       fsrvec = re$FSP
@@ -2538,7 +2695,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -2576,9 +2736,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = sava_unif_sub(subsigma = 1, n.time, prob.start, plrtio, mu0, mudelta, q, k, w0)
@@ -2600,7 +2760,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -2622,6 +2785,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -2644,8 +2808,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(mudelta.v))
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -2668,9 +2834,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(66)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_unif_sub(subsigma, n.time, prob.start, q, plrtio, mu0, mudelta)
@@ -2692,7 +2858,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -2713,9 +2882,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_unif_sub(subsigma, n.time, prob.start, q, ratio.plus, mu0, mudelta)
@@ -2737,7 +2906,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -2761,9 +2933,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = saffron_unif_sub(subsigma, n.time, prob.start, q, plrtio, mu0, mudelta)
@@ -2785,7 +2957,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -2808,9 +2983,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = saffron_unif_sub(subsigma, n.time, prob.start, q, ratio.plus, mu0, mudelta)
       fsrvec = re$FSP
@@ -2831,7 +3006,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -2856,9 +3034,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = addis_unif_sub(subsigma, n.time, prob.start, q, plrtio, mu0, mudelta)
@@ -2880,7 +3058,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -2903,9 +3084,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = addis_unif_sub(subsigma, n.time, prob.start, q, ratio.plus, mu0, mudelta)
       fsrvec = re$FSP
@@ -2926,7 +3107,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -2964,9 +3148,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = sava_ber_sub(berp, subsigma = 1, n.time, prob.start, plrtio, mu0, mudelta, q, k, w0)
@@ -2988,7 +3172,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -3010,6 +3197,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -3032,8 +3220,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(mudelta.v))
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -3056,9 +3246,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(66)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_ber_sub(subsigma, n.time, prob.start, q, plrtio, mu0, mudelta)
@@ -3080,7 +3270,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -3101,9 +3294,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_ber_sub(subsigma, n.time, prob.start, q, ratio.plus, mu0, mudelta)
@@ -3125,7 +3318,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -3149,9 +3345,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = saffron_ber_sub(subsigma, n.time, prob.start, q, plrtio, mu0, mudelta)
@@ -3173,7 +3369,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -3196,9 +3395,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = saffron_ber_sub(subsigma, n.time, prob.start, q, ratio.plus, mu0, mudelta)
       fsrvec = re$FSP
@@ -3219,7 +3418,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -3244,9 +3446,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = addis_ber_sub(subsigma, n.time, prob.start, q, plrtio, mu0, mudelta)
@@ -3268,7 +3470,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -3291,9 +3496,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(mudelta.v), style = 3)
   for(i in 1:length(mudelta.v)){
     mudelta = mudelta.v[i]
-    print(i/length(mudelta.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = addis_ber_sub(subsigma, n.time, prob.start, q, ratio.plus, mu0, mudelta)
       fsrvec = re$FSP
@@ -3314,7 +3519,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(mudelta.v)),
@@ -3356,9 +3564,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = sava_depend_gauss_sub(rho, subsigma, n.time, prob.start, plrtio, mu0, q, k, w0)
@@ -3380,7 +3588,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -3402,6 +3613,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(rho.v), style = 3)
   for(i in 1:length(rho.v)){
     rho = rho.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -3424,8 +3636,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(rho.v))
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(rho.v)),
@@ -3448,9 +3662,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(66)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_dependgauss_sub(rho, subsigma, n.time, prob.start, q, plrtio, mu0)
@@ -3472,7 +3686,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -3493,9 +3710,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(rho.v), style = 3)
   for(i in 1:length(rho.v)){
     rho = rho.v[i]
-    print(i/length(rho.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_dependgauss_sub(rho, subsigma, n.time, prob.start, q, ratio.plus, mu0)
@@ -3517,7 +3734,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(rho.v)),
@@ -3541,9 +3761,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = saffron_dependgauss_sub(rho, subsigma, n.time, prob.start, q, plrtio, mu0)
@@ -3565,7 +3785,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -3588,9 +3811,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(rho.v), style = 3)
   for(i in 1:length(rho.v)){
     rho = rho.v[i]
-    print(i/length(rho.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = saffron_dependgauss_sub(rho, subsigma, n.time, prob.start, q, ratio.plus, mu0)
       fsrvec = re$FSP
@@ -3611,7 +3834,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(rho.v)),
@@ -3636,9 +3862,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = addis_dependgauss_sub(rho, subsigma, n.time, prob.start, q, plrtio, mu0)
@@ -3660,7 +3886,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -3683,9 +3912,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(4)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(rho.v), style = 3)
   for(i in 1:length(rho.v)){
     rho = rho.v[i]
-    print(i/length(rho.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = addis_dependgauss_sub(rho, subsigma, n.time, prob.start, q, ratio.plus, mu0)
       fsrvec = re$FSP
@@ -3706,7 +3935,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(rho.v)),
@@ -3744,9 +3976,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6611)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = sava_depend_gamma(rho, gammak, n.time, prob.start, plrtio, mu, q, k, w0)
@@ -3768,7 +4000,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -3790,6 +4025,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(rho.v), style = 3)
   for(i in 1:length(rho.v)){
     rho = rho.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -3812,8 +4048,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(rho.v))
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(rho.v)),
@@ -3838,9 +4076,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(66)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_dependgamma(rho, gammak, n.time, prob.start, q, plrtio, mu)
@@ -3862,7 +4100,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -3883,9 +4124,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(rho.v), style = 3)
   for(i in 1:length(rho.v)){
     rho = rho.v[i]
-    print(i/length(rho.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = lordpp_dependgamma(rho, gammak, n.time, prob.start, q, ratio.plus, mu)
@@ -3907,7 +4148,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(rho.v)),
@@ -3931,9 +4175,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = saffron_dependgamma(rho, gammak, n.time, prob.start, q, plrtio, mu)
@@ -3955,7 +4199,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -3978,9 +4225,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(rho.v), style = 3)
   for(i in 1:length(rho.v)){
     rho = rho.v[i]
-    print(i/length(rho.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = saffron_dependgamma(rho, gammak, n.time, prob.start, q, ratio.plus, mu)
       fsrvec = re$FSP
@@ -4001,7 +4248,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(rho.v)),
@@ -4026,9 +4276,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(64)
+  pb <- txtProgressBar(min = 0, max = length(ratioplus), style = 3)
   for(i in 1:length(ratioplus)){
     plrtio = ratioplus[i]
-    print(i/length(ratioplus))
     ree = foreach(kk = 1:n.rep, .combine = cbind,
                   .packages = c('truncnorm','SAVA')) %dopar%{
                     re = addis_dependgamma(rho, gammak, n.time, prob.start, q, plrtio, mu)
@@ -4050,7 +4300,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.ratioplus[,i] = result[1:outputlength]
     TSR.ratioplus[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(ratioplus)),
@@ -4073,9 +4326,9 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(6689)
+  pb <- txtProgressBar(min = 0, max = length(rho.v), style = 3)
   for(i in 1:length(rho.v)){
     rho = rho.v[i]
-    print(i/length(rho.v))
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
       re = addis_dependgamma(rho, gammak, n.time, prob.start, q, ratio.plus, mu)
       fsrvec = re$FSP
@@ -4096,7 +4349,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(rho.v)),
@@ -4137,6 +4393,7 @@ ratio.plus = 0.5
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(a.v), style = 3)
   for(i in 1:length(a.v)){
     aa = a.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -4159,8 +4416,10 @@ ratio.plus = 0.5
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(a.v))
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(a.v)),
@@ -4182,6 +4441,7 @@ ratio.plus = 0.5
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(a.v), style = 3)
   for(i in 1:length(a.v)){
     aa = a.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -4204,8 +4464,10 @@ ratio.plus = 0.5
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(a.v))
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(a.v)),
@@ -4239,6 +4501,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(bound.v), style = 3)
   for(i in 1:length(bound.v)){
     bound = bound.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -4261,8 +4524,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(bound.v))
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(bound.v)),
@@ -4286,6 +4551,7 @@ outputlength = n.time*prob.start
   cl <- makeCluster(8)
   registerDoParallel(cl)
   set.seed(668)
+  pb <- txtProgressBar(min = 0, max = length(bound.v), style = 3)
   for(i in 1:length(bound.v)){
     bound = bound.v[i]
     ree = foreach(kk = 1:n.rep, .combine = cbind, .packages = c('truncnorm','SAVA')) %dopar%{
@@ -4308,8 +4574,10 @@ outputlength = n.time*prob.start
     result = rowMeans(ree, na.rm = T)
     FSR.mu[,i] = result[1:outputlength]
     TSR.mu[,i] = result[-(1:outputlength)]
-    print(i/length(bound.v))
+    setTxtProgressBar(pb, i)
   }
+  
+  close(pb)
   stopImplicitCluster()
   stopCluster(cl)
   datare = tibble(time = rep(1:outputlength, length(bound.v)),
@@ -4321,7 +4589,7 @@ outputlength = n.time*prob.start
   
   ggplot(datare)+
     geom_line(aes(x = time, y = TSR, color = K))
-  write_csv(datare, 'sava_truncgauss_K_mu0.5.csv')
+  write_csv(datare, 'sava_truncgauss_K_mu1.5.csv')
 }
 
 
