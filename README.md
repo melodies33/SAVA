@@ -23,9 +23,9 @@ To install the package locally, open a terminal in the repository directory and 
 
 Alternatively, install directly from GitHub:
 
-r library(devtools)
+```r library(devtools)
 devtools::install_github("melodies33/SAVA")
-
+```
 ## Reproducing the Results
 Run the following scripts in order:
 
